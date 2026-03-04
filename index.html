@@ -89,7 +89,7 @@ button{
     margin-bottom:6px;
 }
 
-.lista-item span.concluida{
+.concluida{
     text-decoration: line-through;
     opacity:0.6;
 }
@@ -102,10 +102,6 @@ button{
 
 .acoes button:hover{
     background:#e63950;
-}
-
-.check{
-    margin-right:8px;
 }
 
 .excluir-materia{
@@ -133,9 +129,7 @@ footer{
 <div class="card">
     <h2>Adicionar Matéria</h2>
     <input type="text" id="nomeMateria" placeholder="Nome da matéria">
-    <input type="text" id="novoConteudo" placeholder="Adicionar conteúdo">
-    <input type="text" id="novaTarefa" placeholder="Adicionar tarefa">
-    <button class="btn-add" onclick="adicionarMateria()">Adicionar</button>
+    <button class="btn-add" onclick="adicionarMateria()">Adicionar Matéria</button>
 </div>
 
 <div id="listaMaterias"></div>
@@ -153,118 +147,143 @@ function salvar(){
 
 function renderizar(){
     const lista = document.getElementById("listaMaterias");
-    lista.innerHTML="";
+    lista.innerHTML = "";
 
-    materias.forEach((materia, i)=>{
+    materias.forEach((materia, i) => {
 
-        const div = document.createElement("div");
-        div.className="card materia";
+        const card = document.createElement("div");
+        card.className = "card materia";
 
-        div.innerHTML=`
-            <button class="excluir-materia" onclick="excluirMateria(${i})">Excluir Matéria</button>
-            <h3>${materia.nome}</h3>
+        const titulo = document.createElement("h3");
+        titulo.textContent = materia.nome;
 
-            <strong>Conteúdos</strong>
-            <div id="conteudos-${i}"></div>
-            <input type="text" placeholder="Novo conteúdo" onkeydown="if(event.key==='Enter') addConteudo(${i}, this.value)">
+        const btnExcluirMateria = document.createElement("button");
+        btnExcluirMateria.textContent = "Excluir Matéria";
+        btnExcluirMateria.className = "excluir-materia";
+        btnExcluirMateria.onclick = () => {
+            materias.splice(i,1);
+            salvar();
+            renderizar();
+        };
 
-            <br><br>
-            <strong>Tarefas</strong>
-            <div id="tarefas-${i}"></div>
-            <input type="text" placeholder="Nova tarefa" onkeydown="if(event.key==='Enter') addTarefa(${i}, this.value)">
-        `;
+        card.appendChild(btnExcluirMateria);
+        card.appendChild(titulo);
 
-        lista.appendChild(div);
+        // -------- CONTEÚDOS --------
+        const tituloConteudo = document.createElement("strong");
+        tituloConteudo.textContent = "Conteúdos";
+        card.appendChild(tituloConteudo);
 
-        const conteudosDiv = document.getElementById(`conteudos-${i}`);
-        materia.conteudos.forEach((c, index)=>{
-            conteudosDiv.innerHTML += `
-                <div class="lista-item">
-                    <span>${c}</span>
-                    <div class="acoes">
-                        <button onclick="removerConteudo(${i},${index})">X</button>
-                    </div>
-                </div>`;
+        materia.conteudos.forEach((conteudo, index) => {
+            const item = document.createElement("div");
+            item.className = "lista-item";
+
+            const span = document.createElement("span");
+            span.textContent = conteudo;
+
+            const btn = document.createElement("button");
+            btn.textContent = "X";
+            btn.onclick = () => {
+                materia.conteudos.splice(index,1);
+                salvar();
+                renderizar();
+            };
+
+            const acoes = document.createElement("div");
+            acoes.className = "acoes";
+            acoes.appendChild(btn);
+
+            item.appendChild(span);
+            item.appendChild(acoes);
+            card.appendChild(item);
         });
 
-        const tarefasDiv = document.getElementById(`tarefas-${i}`);
-        materia.tarefas.forEach((t, index)=>{
-            tarefasDiv.innerHTML += `
-                <div class="lista-item">
-                    <div>
-                        <input type="checkbox" class="check" 
-                        ${t.concluida ? "checked" : ""} 
-                        onchange="toggleTarefa(${i},${index})">
-                        <span class="${t.concluida ? "concluida" : ""}">
-                        ${t.texto}
-                        </span>
-                    </div>
-                    <div class="acoes">
-                        <button onclick="removerTarefa(${i},${index})">X</button>
-                    </div>
-                </div>`;
+        const inputConteudo = document.createElement("input");
+        inputConteudo.placeholder = "Novo conteúdo (Enter)";
+        inputConteudo.onkeydown = (e) => {
+            if(e.key === "Enter" && inputConteudo.value.trim()){
+                materia.conteudos.push(inputConteudo.value.trim());
+                salvar();
+                renderizar();
+            }
+        };
+        card.appendChild(inputConteudo);
+
+        // -------- TAREFAS --------
+        const tituloTarefa = document.createElement("strong");
+        tituloTarefa.textContent = "Tarefas";
+        card.appendChild(tituloTarefa);
+
+        materia.tarefas.forEach((tarefa, index) => {
+            const item = document.createElement("div");
+            item.className = "lista-item";
+
+            const left = document.createElement("div");
+
+            const check = document.createElement("input");
+            check.type = "checkbox";
+            check.checked = tarefa.concluida;
+            check.onchange = () => {
+                tarefa.concluida = !tarefa.concluida;
+                salvar();
+                renderizar();
+            };
+
+            const span = document.createElement("span");
+            span.textContent = tarefa.texto;
+            if(tarefa.concluida) span.classList.add("concluida");
+
+            left.appendChild(check);
+            left.appendChild(span);
+
+            const btn = document.createElement("button");
+            btn.textContent = "X";
+            btn.onclick = () => {
+                materia.tarefas.splice(index,1);
+                salvar();
+                renderizar();
+            };
+
+            const acoes = document.createElement("div");
+            acoes.className = "acoes";
+            acoes.appendChild(btn);
+
+            item.appendChild(left);
+            item.appendChild(acoes);
+            card.appendChild(item);
         });
 
+        const inputTarefa = document.createElement("input");
+        inputTarefa.placeholder = "Nova tarefa (Enter)";
+        inputTarefa.onkeydown = (e) => {
+            if(e.key === "Enter" && inputTarefa.value.trim()){
+                materia.tarefas.push({
+                    texto: inputTarefa.value.trim(),
+                    concluida:false
+                });
+                salvar();
+                renderizar();
+            }
+        };
+        card.appendChild(inputTarefa);
+
+        lista.appendChild(card);
     });
 }
 
 function adicionarMateria(){
     const nome = document.getElementById("nomeMateria").value.trim();
-    const conteudo = document.getElementById("novoConteudo").value.trim();
-    const tarefa = document.getElementById("novaTarefa").value.trim();
-
     if(!nome) return alert("Digite o nome da matéria.");
 
     materias.push({
         nome:nome,
-        conteudos: conteudo ? [conteudo] : [],
-        tarefas: tarefa ? [{texto:tarefa, concluida:false}] : []
+        conteudos:[],
+        tarefas:[]
     });
 
     salvar();
     renderizar();
-
     document.getElementById("nomeMateria").value="";
-    document.getElementById("novoConteudo").value="";
-    document.getElementById("novaTarefa").value="";
-}
-
-function excluirMateria(i){
-    materias.splice(i,1);
-    salvar();
-    renderizar();
-}
-
-function addConteudo(i, valor){
-    if(!valor) return;
-    materias[i].conteudos.push(valor);
-    salvar();
-    renderizar();
-}
-
-function removerConteudo(i,index){
-    materias[i].conteudos.splice(index,1);
-    salvar();
-    renderizar();
-}
-
-function addTarefa(i, valor){
-    if(!valor) return;
-    materias[i].tarefas.push({texto:valor, concluida:false});
-    salvar();
-    renderizar();
-}
-
-function removerTarefa(i,index){
-    materias[i].tarefas.splice(index,1);
-    salvar();
-    renderizar();
-}
-
-function toggleTarefa(i,index){
-    materias[i].tarefas[index].concluida = !materias[i].tarefas[index].concluida;
-    salvar();
-    renderizar();
 }
 
 renderizar();
