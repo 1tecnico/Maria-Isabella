@@ -3,120 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Escolar Digital</title>
+<title>Mochila Escolar</title>
 
 <style>
+
 :root{
-    --rosa-principal:#ffb6c1;
-    --rosa-secundario:#ff9eb5;
-    --rosa-claro:#fff0f5;
-    --fundo:#ffe6f0;
-    --texto:#5a2a3a;
+--rosa1:#ffb6c1;
+--rosa2:#ff9eb5;
+--rosa3:#fff0f5;
+--fundo:#ffe6f0;
+--texto:#5a2a3a;
 }
 
 body{
-    margin:0;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background:var(--fundo);
+margin:0;
+font-family:Segoe UI, Arial;
+background:var(--fundo);
+color:var(--texto);
 }
 
 header{
-    background:var(--rosa-principal);
-    color:var(--texto);
-    padding:20px;
-    text-align:center;
-    font-size:22px;
-    font-weight:bold;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+background:var(--rosa1);
+padding:20px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+nav{
+display:flex;
+justify-content:center;
+gap:10px;
+background:var(--rosa3);
+padding:10px;
+}
+
+nav button{
+background:var(--rosa2);
+border:none;
+padding:10px 15px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+nav button:hover{
+background:#ff85a2;
 }
 
 .container{
-    max-width:800px;
-    margin:auto;
-    padding:20px;
+max-width:900px;
+margin:auto;
+padding:20px;
 }
 
 .card{
-    background:white;
-    border-radius:16px;
-    padding:20px;
-    margin-bottom:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+margin-bottom:20px;
 }
 
 input{
-    width:100%;
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:8px;
-    border:1px solid var(--rosa-principal);
+width:100%;
+padding:10px;
+margin:5px 0 10px 0;
+border-radius:8px;
+border:1px solid var(--rosa1);
 }
 
 button{
-    padding:8px 12px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
+padding:8px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
 }
 
-.btn-add{
-    background:var(--rosa-secundario);
-    color:var(--texto);
-    width:100%;
-}
-
-.btn-add:hover{
-    background:#ff85a2;
-}
-
-.materia{
-    border-left:6px solid var(--rosa-secundario);
-}
-
-.materia h3{
-    margin-top:0;
-    color:#c71585;
+.btn{
+background:var(--rosa2);
 }
 
 .lista-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:var(--rosa-claro);
-    padding:8px 10px;
-    border-radius:8px;
-    margin-bottom:6px;
+display:flex;
+justify-content:space-between;
+background:var(--rosa3);
+padding:8px;
+border-radius:8px;
+margin-bottom:5px;
 }
 
 .concluida{
-    text-decoration: line-through;
-    opacity:0.6;
+text-decoration:line-through;
+opacity:0.6;
 }
 
-.acoes button{
-    margin-left:5px;
-    background:#ff4d6d;
-    color:white;
-}
-
-.acoes button:hover{
-    background:#e63950;
-}
-
-.excluir-materia{
-    background:#ff4d6d;
-    color:white;
-    float:right;
+.hidden{
+display:none;
 }
 
 footer{
-    text-align:center;
-    padding:15px;
-    background:var(--rosa-principal);
-    margin-top:30px;
-    color:var(--texto);
+text-align:center;
+padding:15px;
+background:var(--rosa1);
 }
+
 </style>
 </head>
 
@@ -124,169 +116,293 @@ footer{
 
 <header>🎒 Minha Mochila Escolar</header>
 
+<nav>
+<button onclick="trocarAba('materias')">Matérias</button>
+<button onclick="trocarAba('info')">Informações</button>
+<button onclick="trocarAba('provas')">Provas</button>
+</nav>
+
 <div class="container">
 
+<!-- MATÉRIAS -->
+
+<div id="materias">
+
 <div class="card">
-    <h2>Adicionar Matéria</h2>
-    <input type="text" id="nomeMateria" placeholder="Nome da matéria">
-    <button class="btn-add" onclick="adicionarMateria()">Adicionar Matéria</button>
+<h2>Adicionar Matéria</h2>
+<input id="nomeMateria" placeholder="Nome da matéria">
+<button class="btn" onclick="addMateria()">Adicionar</button>
 </div>
 
 <div id="listaMaterias"></div>
 
 </div>
 
-<footer>© 2026 Mochila Escolar Digital</footer>
+<!-- INFORMAÇÕES -->
+
+<div id="info" class="hidden">
+
+<div class="card">
+<h2>Informações Escolares</h2>
+
+<input id="escola" placeholder="Nome da escola">
+<input id="turma" placeholder="Turma">
+<input id="serie" placeholder="Série/Ano">
+<input id="professor" placeholder="Professor responsável">
+
+<button class="btn" onclick="salvarInfo()">Salvar Informações</button>
+
+<div id="mostrarInfo"></div>
+
+</div>
+
+</div>
+
+<!-- PROVAS -->
+
+<div id="provas" class="hidden">
+
+<div class="card">
+<h2>Adicionar Prova</h2>
+
+<input id="materiaProva" placeholder="Matéria">
+<input id="dataProva" type="date">
+<input id="conteudoProva" placeholder="Conteúdo da prova">
+
+<button class="btn" onclick="addProva()">Adicionar Prova</button>
+
+</div>
+
+<div id="listaProvas"></div>
+
+</div>
+
+</div>
+
+<footer>© 2026 Mochila Escolar</footer>
 
 <script>
+
 let materias = JSON.parse(localStorage.getItem("materias")) || [];
+let provas = JSON.parse(localStorage.getItem("provas")) || [];
+let info = JSON.parse(localStorage.getItem("info")) || {};
 
 function salvar(){
-    localStorage.setItem("materias", JSON.stringify(materias));
+localStorage.setItem("materias",JSON.stringify(materias));
+localStorage.setItem("provas",JSON.stringify(provas));
+localStorage.setItem("info",JSON.stringify(info));
 }
 
-function renderizar(){
-    const lista = document.getElementById("listaMaterias");
-    lista.innerHTML = "";
+function trocarAba(aba){
 
-    materias.forEach((materia, i) => {
+document.getElementById("materias").classList.add("hidden");
+document.getElementById("info").classList.add("hidden");
+document.getElementById("provas").classList.add("hidden");
 
-        const card = document.createElement("div");
-        card.className = "card materia";
+document.getElementById(aba).classList.remove("hidden");
 
-        const titulo = document.createElement("h3");
-        titulo.textContent = materia.nome;
-
-        const btnExcluirMateria = document.createElement("button");
-        btnExcluirMateria.textContent = "Excluir Matéria";
-        btnExcluirMateria.className = "excluir-materia";
-        btnExcluirMateria.onclick = () => {
-            materias.splice(i,1);
-            salvar();
-            renderizar();
-        };
-
-        card.appendChild(btnExcluirMateria);
-        card.appendChild(titulo);
-
-        // -------- CONTEÚDOS --------
-        const tituloConteudo = document.createElement("strong");
-        tituloConteudo.textContent = "Conteúdos";
-        card.appendChild(tituloConteudo);
-
-        materia.conteudos.forEach((conteudo, index) => {
-            const item = document.createElement("div");
-            item.className = "lista-item";
-
-            const span = document.createElement("span");
-            span.textContent = conteudo;
-
-            const btn = document.createElement("button");
-            btn.textContent = "X";
-            btn.onclick = () => {
-                materia.conteudos.splice(index,1);
-                salvar();
-                renderizar();
-            };
-
-            const acoes = document.createElement("div");
-            acoes.className = "acoes";
-            acoes.appendChild(btn);
-
-            item.appendChild(span);
-            item.appendChild(acoes);
-            card.appendChild(item);
-        });
-
-        const inputConteudo = document.createElement("input");
-        inputConteudo.placeholder = "Novo conteúdo (Enter)";
-        inputConteudo.onkeydown = (e) => {
-            if(e.key === "Enter" && inputConteudo.value.trim()){
-                materia.conteudos.push(inputConteudo.value.trim());
-                salvar();
-                renderizar();
-            }
-        };
-        card.appendChild(inputConteudo);
-
-        // -------- TAREFAS --------
-        const tituloTarefa = document.createElement("strong");
-        tituloTarefa.textContent = "Tarefas";
-        card.appendChild(tituloTarefa);
-
-        materia.tarefas.forEach((tarefa, index) => {
-            const item = document.createElement("div");
-            item.className = "lista-item";
-
-            const left = document.createElement("div");
-
-            const check = document.createElement("input");
-            check.type = "checkbox";
-            check.checked = tarefa.concluida;
-            check.onchange = () => {
-                tarefa.concluida = !tarefa.concluida;
-                salvar();
-                renderizar();
-            };
-
-            const span = document.createElement("span");
-            span.textContent = tarefa.texto;
-            if(tarefa.concluida) span.classList.add("concluida");
-
-            left.appendChild(check);
-            left.appendChild(span);
-
-            const btn = document.createElement("button");
-            btn.textContent = "X";
-            btn.onclick = () => {
-                materia.tarefas.splice(index,1);
-                salvar();
-                renderizar();
-            };
-
-            const acoes = document.createElement("div");
-            acoes.className = "acoes";
-            acoes.appendChild(btn);
-
-            item.appendChild(left);
-            item.appendChild(acoes);
-            card.appendChild(item);
-        });
-
-        const inputTarefa = document.createElement("input");
-        inputTarefa.placeholder = "Nova tarefa (Enter)";
-        inputTarefa.onkeydown = (e) => {
-            if(e.key === "Enter" && inputTarefa.value.trim()){
-                materia.tarefas.push({
-                    texto: inputTarefa.value.trim(),
-                    concluida:false
-                });
-                salvar();
-                renderizar();
-            }
-        };
-        card.appendChild(inputTarefa);
-
-        lista.appendChild(card);
-    });
 }
 
-function adicionarMateria(){
-    const nome = document.getElementById("nomeMateria").value.trim();
-    if(!nome) return alert("Digite o nome da matéria.");
+function renderMaterias(){
 
-    materias.push({
-        nome:nome,
-        conteudos:[],
-        tarefas:[]
-    });
+const lista=document.getElementById("listaMaterias");
+lista.innerHTML="";
 
-    salvar();
-    renderizar();
-    document.getElementById("nomeMateria").value="";
+materias.forEach((m,i)=>{
+
+const card=document.createElement("div");
+card.className="card";
+
+card.innerHTML=`
+<h3>${m.nome}</h3>
+<button onclick="delMateria(${i})">Excluir</button>
+
+<h4>Conteúdos</h4>
+<div id="conteudos${i}"></div>
+<input placeholder="Novo conteúdo" onkeydown="if(event.key==='Enter')addConteudo(${i},this.value)">
+
+<h4>Tarefas</h4>
+<div id="tarefas${i}"></div>
+<input placeholder="Nova tarefa" onkeydown="if(event.key==='Enter')addTarefa(${i},this.value)">
+`;
+
+lista.appendChild(card);
+
+const conteudos=document.getElementById("conteudos"+i);
+
+m.conteudos.forEach((c,ci)=>{
+
+conteudos.innerHTML+=`
+<div class="lista-item">
+<span>${c}</span>
+<button onclick="delConteudo(${i},${ci})">X</button>
+</div>
+`;
+
+});
+
+const tarefas=document.getElementById("tarefas"+i);
+
+m.tarefas.forEach((t,ti)=>{
+
+tarefas.innerHTML+=`
+<div class="lista-item">
+<div>
+<input type="checkbox" ${t.concluida?"checked":""}
+onchange="toggle(${i},${ti})">
+<span class="${t.concluida?"concluida":""}">
+${t.texto}
+</span>
+</div>
+<button onclick="delTarefa(${i},${ti})">X</button>
+</div>
+`;
+
+});
+
+});
+
 }
 
-renderizar();
+function addMateria(){
+
+const nome=document.getElementById("nomeMateria").value.trim();
+if(!nome)return alert("Digite o nome");
+
+materias.push({nome,conteudos:[],tarefas:[]});
+
+salvar();
+renderMaterias();
+
+document.getElementById("nomeMateria").value="";
+
+}
+
+function delMateria(i){
+
+materias.splice(i,1);
+salvar();
+renderMaterias();
+
+}
+
+function addConteudo(i,v){
+
+if(!v)return;
+materias[i].conteudos.push(v);
+
+salvar();
+renderMaterias();
+
+}
+
+function delConteudo(i,ci){
+
+materias[i].conteudos.splice(ci,1);
+salvar();
+renderMaterias();
+
+}
+
+function addTarefa(i,v){
+
+if(!v)return;
+
+materias[i].tarefas.push({texto:v,concluida:false});
+
+salvar();
+renderMaterias();
+
+}
+
+function delTarefa(i,ti){
+
+materias[i].tarefas.splice(ti,1);
+salvar();
+renderMaterias();
+
+}
+
+function toggle(i,ti){
+
+materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida;
+salvar();
+renderMaterias();
+
+}
+
+function salvarInfo(){
+
+info={
+escola:document.getElementById("escola").value,
+turma:document.getElementById("turma").value,
+serie:document.getElementById("serie").value,
+professor:document.getElementById("professor").value
+};
+
+salvar();
+mostrarInfo();
+
+}
+
+function mostrarInfo(){
+
+const div=document.getElementById("mostrarInfo");
+
+div.innerHTML=`
+<p><b>Escola:</b> ${info.escola||""}</p>
+<p><b>Turma:</b> ${info.turma||""}</p>
+<p><b>Série:</b> ${info.serie||""}</p>
+<p><b>Professor:</b> ${info.professor||""}</p>
+`;
+
+}
+
+function addProva(){
+
+const materia=document.getElementById("materiaProva").value;
+const data=document.getElementById("dataProva").value;
+const conteudo=document.getElementById("conteudoProva").value;
+
+provas.push({materia,data,conteudo});
+
+salvar();
+renderProvas();
+
+}
+
+function renderProvas(){
+
+const lista=document.getElementById("listaProvas");
+lista.innerHTML="";
+
+provas.forEach((p,i)=>{
+
+lista.innerHTML+=`
+<div class="card">
+<h3>${p.materia}</h3>
+<p><b>Data:</b> ${p.data}</p>
+<p><b>Conteúdo:</b> ${p.conteudo}</p>
+<button onclick="delProva(${i})">Excluir</button>
+</div>
+`;
+
+});
+
+}
+
+function delProva(i){
+
+provas.splice(i,1);
+salvar();
+renderProvas();
+
+}
+
+renderMaterias();
+renderProvas();
+mostrarInfo();
+
 </script>
 
 </body>
