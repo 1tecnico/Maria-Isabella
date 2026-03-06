@@ -1,364 +1,512 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Mochila Escolar</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mochila Escolar — Painel</title>
 <style>
-
-body{
-font-family: Arial;
-margin:0;
-background:#e8f5e9;
-}
-
-header{
-background:#a5d6a7;
-padding:20px;
-text-align:center;
-}
-
-nav{
-display:flex;
-justify-content:center;
-gap:10px;
-background:#c8e6c9;
-padding:10px;
-}
-
-nav button{
-padding:10px 15px;
-border:none;
-background:#81c784;
-border-radius:6px;
-cursor:pointer;
-}
-
-nav button:hover{
-background:#66bb6a;
-}
-
-.aba{
-display:none;
-padding:20px;
-}
-
-.ativa{
-display:block;
-}
-
-input,select{
-padding:8px;
-margin:5px;
-}
-
-.materia{
-background:white;
-padding:12px;
-margin-top:10px;
-border-radius:6px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-.concluida{
-text-decoration:line-through;
-color:gray;
-}
-
+  :root{
+    --bg:#f3fbf6;
+    --card:#ffffff;
+    --accent:#9fd6b8;
+    --accent-2:#7fcaa0;
+    --muted:#6b6b6b;
+    --success:#4caf50;
+    --danger:#e57373;
+    --glass: rgba(255,255,255,0.6);
+    --radius:12px;
+    --shadow: 0 6px 18px rgba(20,30,20,0.06);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#eef8f0);color:#123; }
+  .wrap{max-width:1100px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 360px;gap:20px;}
+  header{grid-column:1/-1;display:flex;align-items:center;gap:16px;margin-bottom:6px;}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:var(--shadow)}
+  h1{font-size:20px;margin:0}
+  .search{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .search input{padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);width:320px;background:var(--card);box-shadow:var(--shadow)}
+  .main{display:flex;flex-direction:column;gap:16px}
+  .panel{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+  .row{display:flex;gap:12px;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  /* Categories (gavetas) */
+  .categories{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .drawer{border-radius:10px;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,0.9),var(--glass));border:1px solid rgba(0,0,0,0.03)}
+  .drawer h3{margin:0 0 8px 0;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+  .drawer .list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow:auto;padding-right:6px}
+  .subject{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(90deg,#fff, #fbfffb);border:1px solid rgba(0,0,0,0.03)}
+  .subject .meta{display:flex;flex-direction:column}
+  .subject .meta small{color:var(--muted)}
+  .subject .actions{display:flex;gap:6px}
+  button.icon{background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer}
+  button.primary{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:10px;cursor:pointer}
+  .add-row{display:flex;gap:8px;margin-top:8px}
+  input[type="text"], input[type="date"], select{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);flex:1}
+  .small{font-size:13px}
+  /* Right column */
+  .side{display:flex;flex-direction:column;gap:12px}
+  .tasks-list, .contents-list, .exams-list{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow:auto;padding-right:6px}
+  .task{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:#fbfffb;border:1px solid rgba(0,0,0,0.03)}
+  .task.done{opacity:0.6;text-decoration:line-through}
+  .content-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#fff}
+  .exam-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(90deg,#fff,#f7fff7)}
+  footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
+  /* responsive */
+  @media (max-width:980px){
+    .wrap{grid-template-columns:1fr; padding:12px}
+    .search input{width:180px}
+  }
 </style>
 </head>
-
 <body>
+  <div class="wrap" id="app">
+    <header>
+      <div class="logo">🎒</div>
+      <div>
+        <h1>Mochila Escolar</h1>
+        <div class="muted">Matérias, tarefas, conteúdos e calendário de provas</div>
+      </div>
 
-<header>
-<h1>🎒 Mochila Escolar Digital</h1>
-</header>
+      <div class="search">
+        <input id="globalSearch" placeholder="🔎 Buscar matérias, tarefas, conteúdos..." />
+      </div>
+    </header>
 
-<nav>
-<button onclick="abrirAba('mochila')">🎒 Mochila</button>
-<button onclick="abrirAba('provas')">📅 Calendário de Provas</button>
-<button onclick="abrirAba('info')">ℹ Informações Escolares</button>
-</nav>
+    <main class="main">
+      <section class="panel">
+        <div class="row" style="justify-content:space-between">
+          <div>
+            <strong>Organização por Categorias</strong>
+            <div class="muted small">Exatas, Humanas, Itinerários, Curso</div>
+          </div>
+          <div class="muted small">Adicione matérias, tarefas e conteúdos — tudo salvo automaticamente</div>
+        </div>
 
-<!-- MOCHILA -->
+        <hr style="border:none;height:12px;background:transparent">
 
-<div id="mochila" class="aba ativa">
+        <div class="categories" id="categoriesContainer">
+          <!-- Drawers serão inseridas aqui -->
+        </div>
 
-<h2>Matérias</h2>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <input id="newSubjectName" placeholder="➕ Nova matéria (nome)" />
+          <select id="newSubjectCategory">
+            <option value="Exatas">Exatas</option>
+            <option value="Humanas">Humanas</option>
+            <option value="Itinerários">Itinerários</option>
+            <option value="Curso">Curso</option>
+          </select>
+          <button id="addSubjectBtn" class="primary">Adicionar matéria</button>
+        </div>
+      </section>
 
-<input id="pesquisa" placeholder="Pesquisar matéria">
+      <section class="panel">
+        <strong>Informações Escolares</strong>
+        <div class="muted small" style="margin-top:8px">Adicione notas rápidas sobre a escola, horários, contatos ou observações.</div>
+        <textarea id="schoolInfo" style="width:100%;margin-top:8px;border-radius:10px;padding:10px;border:1px solid rgba(0,0,0,0.06);min-height:120px"></textarea>
+      </section>
+    </main>
 
-<br>
+    <aside class="side">
+      <div class="panel">
+        <strong>📚 Tarefas</strong>
+        <div class="muted small">Adicione tarefas vinculadas a uma matéria</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <select id="taskSubjectSelect"></select>
+          <input id="newTaskText" placeholder="Nova tarefa — pressione Enter para adicionar" />
+          <button id="addTaskBtn" class="primary">Adicionar</button>
+        </div>
+        <div class="tasks-list" id="tasksList" style="margin-top:10px"></div>
+      </div>
 
-<input id="materiaNome" placeholder="Nome da matéria">
+      <div class="panel">
+        <strong>📚 Conteúdos</strong>
+        <div class="muted small">Links, resumos ou materiais</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <select id="contentSubjectSelect"></select>
+          <input id="newContentText" placeholder="Adicionar conteúdo (texto ou URL) e Enter" />
+          <button id="addContentBtn" class="primary">Adicionar</button>
+        </div>
+        <div class="contents-list" id="contentsList" style="margin-top:10px"></div>
+      </div>
 
-<select id="categoria">
-<option>Exatas</option>
-<option>Humanas</option>
-<option>Itinerários</option>
-<option>Curso</option>
-</select>
+      <div class="panel">
+        <strong>📅 Calendário de Provas</strong>
+        <div class="muted small">Adicione provas com data e matéria</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <select id="examSubjectSelect"></select>
+          <input id="examDate" type="date" />
+          <input id="examTitle" placeholder="Título da prova" />
+          <button id="addExamBtn" class="primary">Adicionar</button>
+        </div>
+        <div class="exams-list" id="examsList" style="margin-top:10px"></div>
+      </div>
+    </aside>
 
-<button onclick="addMateria()">Adicionar</button>
-
-<div id="listaMaterias"></div>
-
-</div>
-
-<!-- PROVAS -->
-
-<div id="provas" class="aba">
-
-<h2>Calendário de Provas</h2>
-
-<input id="provaNome" placeholder="Nome da prova">
-<input type="date" id="provaData">
-
-<button onclick="addProva()">Adicionar</button>
-
-<ul id="listaProvas"></ul>
-
-</div>
-
-<!-- INFORMAÇÕES -->
-
-<div id="info" class="aba">
-
-<h2>Informações Escolares</h2>
-
-<textarea id="infoTexto" rows="8" style="width:100%" placeholder="Anotações da escola..."></textarea>
-
-<br><br>
-
-<button onclick="salvarInfo()">Salvar</button>
-
-</div>
+    <footer>Salvamento automático no navegador • Tema verde pastel • Layout organizado</footer>
+  </div>
 
 <script>
+/* ====== Estrutura de dados e persistência ====== */
+const STORAGE_KEY = 'mochila_escolar_v1';
 
-let materias = JSON.parse(localStorage.getItem("materias")) || []
-let provas = JSON.parse(localStorage.getItem("provas")) || []
+let state = {
+  subjects: [], // {id,name,category}
+  tasks: [],    // {id,subjectId,text,done,createdAt}
+  contents: [], // {id,subjectId,text,createdAt}
+  exams: [],    // {id,subjectId,title,date}
+  schoolInfo: ''
+};
 
-function abrirAba(nome){
-
-document.querySelectorAll(".aba").forEach(a=>{
-a.classList.remove("ativa")
-})
-
-document.getElementById(nome).classList.add("ativa")
-
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function salvar(){
-
-localStorage.setItem("materias",JSON.stringify(materias))
-
+function loadState(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    try{
+      state = JSON.parse(raw);
+    }catch(e){ console.warn('Erro ao carregar estado',e) }
+  } else {
+    // dados iniciais de exemplo
+    state.subjects = [
+      {id: 's1', name:'Matemática', category:'Exatas'},
+      {id: 's2', name:'História', category:'Humanas'},
+      {id: 's3', name:'Programação', category:'Curso'}
+    ];
+    state.tasks = [
+      {id:'t1',subjectId:'s1',text:'Resolver lista 5',done:false,createdAt:Date.now()},
+      {id:'t2',subjectId:'s2',text:'Ler capítulo 3',done:false,createdAt:Date.now()}
+    ];
+    state.contents = [
+      {id:'c1',subjectId:'s3',text:'Revisar arrays e objetos',createdAt:Date.now()}
+    ];
+    state.exams = [
+      {id:'e1',subjectId:'s1',title:'Prova Bimestral',date: new Date(Date.now()+7*24*3600*1000).toISOString().slice(0,10)}
+    ];
+    state.schoolInfo = 'Horário: 7h-12h; Contato secretaria: (xx) xxxx-xxxx';
+    saveState();
+  }
 }
 
-function addMateria(){
+/* ====== Utilitários ====== */
+function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+function byId(id){ return document.getElementById(id); }
 
-let nome=document.getElementById("materiaNome").value
-let cat=document.getElementById("categoria").value
-
-if(nome=="") return
-
-materias.push({
-nome:nome,
-categoria:cat,
-tarefas:[],
-conteudos:[]
-})
-
-document.getElementById("materiaNome").value=""
-
-salvar()
-
-render()
-
-}
-
-function excluirMateria(i){
-
-materias.splice(i,1)
-
-salvar()
-
-render()
-
-}
-
-function addTarefa(i){
-
-let t=prompt("Nova tarefa")
-
-if(!t) return
-
-materias[i].tarefas.push({texto:t,done:false})
-
-salvar()
-
-render()
-
-}
-
-function concluirTarefa(mi,ti){
-
-materias[mi].tarefas[ti].done=!materias[mi].tarefas[ti].done
-
-salvar()
-
-render()
-
-}
-
-function excluirTarefa(mi,ti){
-
-materias[mi].tarefas.splice(ti,1)
-
-salvar()
-
-render()
-
-}
-
-function addConteudo(i){
-
-let c=prompt("Conteúdo estudado")
-
-if(!c) return
-
-materias[i].conteudos.push(c)
-
-salvar()
-
-render()
-
-}
-
-function excluirConteudo(mi,ci){
-
-materias[mi].conteudos.splice(ci,1)
-
-salvar()
-
-render()
-
-}
-
+/* ====== Render ====== */
 function render(){
-
-let lista=document.getElementById("listaMaterias")
-
-lista.innerHTML=""
-
-let pesquisa=document.getElementById("pesquisa").value.toLowerCase()
-
-materias.forEach((m,i)=>{
-
-if(!m.nome.toLowerCase().includes(pesquisa)) return
-
-let div=document.createElement("div")
-
-div.className="materia"
-
-div.innerHTML=`
-
-<h3>${m.nome} (${m.categoria})</h3>
-
-<button onclick="excluirMateria(${i})">Excluir Matéria</button>
-
-<h4>Tarefas</h4>
-
-<ul>
-
-${m.tarefas.map((t,ti)=>`
-<li class="${t.done?'concluida':''}">
-${t.texto}
-<button onclick="concluirTarefa(${i},${ti})">✔</button>
-<button onclick="excluirTarefa(${i},${ti})">❌</button>
-</li>
-`).join("")}
-
-</ul>
-
-<button onclick="addTarefa(${i})">Adicionar tarefa</button>
-
-<h4>Conteúdos</h4>
-
-<ul>
-
-${m.conteudos.map((c,ci)=>`
-<li>
-${c}
-<button onclick="excluirConteudo(${i},${ci})">❌</button>
-</li>
-`).join("")}
-
-</ul>
-
-<button onclick="addConteudo(${i})">Adicionar conteúdo</button>
-
-`
-
-lista.appendChild(div)
-
-})
-
+  renderCategories();
+  renderSelects();
+  renderTasks();
+  renderContents();
+  renderExams();
+  byId('schoolInfo').value = state.schoolInfo || '';
 }
 
-function addProva(){
+/* Render gavetas por categoria */
+const CATEGORIES = ['Exatas','Humanas','Itinerários','Curso'];
+function renderCategories(){
+  const container = byId('categoriesContainer');
+  container.innerHTML = '';
+  const q = byId('globalSearch').value.trim().toLowerCase();
 
-let nome=document.getElementById("provaNome").value
-let data=document.getElementById("provaData").value
+  CATEGORIES.forEach(cat=>{
+    const drawer = document.createElement('div');
+    drawer.className = 'drawer';
+    const h = document.createElement('h3');
+    h.innerHTML = `<span>${cat}</span><small class="muted">${state.subjects.filter(s=>s.category===cat).length} matérias</small>`;
+    drawer.appendChild(h);
 
-if(!nome || !data) return
+    const list = document.createElement('div');
+    list.className = 'list';
 
-provas.push({nome,data})
+    const subjects = state.subjects.filter(s=>s.category===cat);
+    subjects.forEach(sub=>{
+      // filter global search across subject name, tasks, contents
+      const matches = matchesSearch(sub, q);
+      if(q && !matches) return;
 
-localStorage.setItem("provas",JSON.stringify(provas))
+      const item = document.createElement('div');
+      item.className = 'subject';
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.innerHTML = `<strong>${escapeHtml(sub.name)}</strong><small class="muted">${sub.category}</small>`;
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const openBtn = document.createElement('button'); openBtn.className='icon'; openBtn.title='Abrir matéria'; openBtn.innerText='📂';
+      openBtn.onclick = ()=>openSubjectModal(sub.id);
+      const delBtn = document.createElement('button'); delBtn.className='icon'; delBtn.title='Excluir matéria'; delBtn.innerText='🗑️';
+      delBtn.onclick = ()=>{ if(confirm('Excluir matéria e todo o conteúdo/tarefas?')) deleteSubject(sub.id); };
+      actions.appendChild(openBtn); actions.appendChild(delBtn);
+      item.appendChild(meta); item.appendChild(actions);
+      list.appendChild(item);
+    });
 
-renderProvas()
+    // se não houver matérias, mostrar mensagem
+    if(list.children.length===0){
+      const empty = document.createElement('div'); empty.className='muted small'; empty.style.padding='6px'; empty.innerText='Nenhuma matéria';
+      list.appendChild(empty);
+    }
 
+    drawer.appendChild(list);
+    container.appendChild(drawer);
+  });
 }
 
-function renderProvas(){
-
-let lista=document.getElementById("listaProvas")
-
-lista.innerHTML=""
-
-provas.forEach(p=>{
-
-let li=document.createElement("li")
-
-li.innerText=p.nome+" - "+p.data
-
-lista.appendChild(li)
-
-})
-
+/* Verifica se matéria corresponde à busca (nome, tarefas, conteúdos) */
+function matchesSearch(subject, q){
+  if(!q) return true;
+  if(subject.name.toLowerCase().includes(q)) return true;
+  const hasTask = state.tasks.some(t=>t.subjectId===subject.id && t.text.toLowerCase().includes(q));
+  if(hasTask) return true;
+  const hasContent = state.contents.some(c=>c.subjectId===subject.id && c.text.toLowerCase().includes(q));
+  if(hasContent) return true;
+  const hasExam = state.exams.some(e=>e.subjectId===subject.id && (e.title||'').toLowerCase().includes(q));
+  if(hasExam) return true;
+  return false;
 }
 
-function salvarInfo(){
-
-let texto=document.getElementById("infoTexto").value
-
-localStorage.setItem("info",texto)
-
+/* Render selects para adicionar itens */
+function renderSelects(){
+  const taskSel = byId('taskSubjectSelect');
+  const contentSel = byId('contentSubjectSelect');
+  const examSel = byId('examSubjectSelect');
+  [taskSel,contentSel,examSel].forEach(s=>s.innerHTML='');
+  state.subjects.forEach(s=>{
+    const opt = `<option value="${s.id}">${escapeHtml(s.name)}</option>`;
+    taskSel.insertAdjacentHTML('beforeend',opt);
+    contentSel.insertAdjacentHTML('beforeend',opt);
+    examSel.insertAdjacentHTML('beforeend',opt);
+  });
 }
 
-document.getElementById("infoTexto").value=localStorage.getItem("info")||""
+/* Render tarefas */
+function renderTasks(){
+  const list = byId('tasksList'); list.innerHTML='';
+  const q = byId('globalSearch').value.trim().toLowerCase();
+  const tasks = state.tasks.slice().sort((a,b)=>b.createdAt-a.createdAt);
+  tasks.forEach(t=>{
+    if(q){
+      const subj = state.subjects.find(s=>s.id===t.subjectId);
+      const textMatch = t.text.toLowerCase().includes(q);
+      const subjMatch = subj && subj.name.toLowerCase().includes(q);
+      if(!textMatch && !subjMatch) return;
+    }
+    const el = document.createElement('div'); el.className='task' + (t.done ? ' done' : '');
+    el.innerHTML = `
+      <input type="checkbox" ${t.done ? 'checked' : ''} data-id="${t.id}" />
+      <div style="flex:1">
+        <div><strong>${escapeHtml(t.text)}</strong></div>
+        <div class="muted small">${escapeHtml((state.subjects.find(s=>s.id===t.subjectId)||{name:'—'}).name)}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="icon" data-action="delete" data-id="${t.id}">❌</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
 
-document.getElementById("pesquisa").addEventListener("input",render)
+/* Render conteúdos */
+function renderContents(){
+  const list = byId('contentsList'); list.innerHTML='';
+  const q = byId('globalSearch').value.trim().toLowerCase();
+  const contents = state.contents.slice().sort((a,b)=>b.createdAt-a.createdAt);
+  contents.forEach(c=>{
+    if(q){
+      const subj = state.subjects.find(s=>s.id===c.subjectId);
+      const textMatch = c.text.toLowerCase().includes(q);
+      const subjMatch = subj && subj.name.toLowerCase().includes(q);
+      if(!textMatch && !subjMatch) return;
+    }
+    const el = document.createElement('div'); el.className='content-item';
+    el.innerHTML = `
+      <div>
+        <div><strong>${escapeHtml(c.text)}</strong></div>
+        <div class="muted small">${escapeHtml((state.subjects.find(s=>s.id===c.subjectId)||{name:'—'}).name)}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="icon" data-action="deleteContent" data-id="${c.id}">🗑️</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
 
-document.getElementById("materiaNome").addEventListener("keypress",e=>{
-if(e.key==="Enter") addMateria()
-})
+/* Render provas */
+function renderExams(){
+  const list = byId('examsList'); list.innerHTML='';
+  const q = byId('globalSearch').value.trim().toLowerCase();
+  const exams = state.exams.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  exams.forEach(e=>{
+    if(q){
+      const subj = state.subjects.find(s=>s.id===e.subjectId);
+      const titleMatch = (e.title||'').toLowerCase().includes(q);
+      const subjMatch = subj && subj.name.toLowerCase().includes(q);
+      if(!titleMatch && !subjMatch) return;
+    }
+    const el = document.createElement('div'); el.className='exam-item';
+    el.innerHTML = `
+      <div>
+        <div><strong>${escapeHtml(e.title || 'Prova')}</strong></div>
+        <div class="muted small">${escapeHtml((state.subjects.find(s=>s.id===e.subjectId)||{name:'—'}).name)} • ${escapeHtml(e.date)}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="icon" data-action="deleteExam" data-id="${e.id}">❌</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
 
-render()
-renderProvas()
+/* ====== Ações ====== */
+function addSubject(name, category){
+  if(!name || !name.trim()) return alert('Informe o nome da matéria.');
+  const id = uid('s');
+  state.subjects.push({id,name:name.trim(),category});
+  saveState(); render();
+}
 
+function deleteSubject(id){
+  state.subjects = state.subjects.filter(s=>s.id!==id);
+  state.tasks = state.tasks.filter(t=>t.subjectId!==id);
+  state.contents = state.contents.filter(c=>c.subjectId!==id);
+  state.exams = state.exams.filter(e=>e.subjectId!==id);
+  saveState(); render();
+}
+
+function addTask(subjectId, text){
+  if(!text || !text.trim()) return;
+  const id = uid('t');
+  state.tasks.push({id,subjectId,text:text.trim(),done:false,createdAt:Date.now()});
+  saveState(); render();
+}
+
+function toggleTaskDone(id){
+  const t = state.tasks.find(x=>x.id===id); if(!t) return;
+  t.done = !t.done; saveState(); render();
+}
+
+function deleteTask(id){
+  state.tasks = state.tasks.filter(t=>t.id!==id); saveState(); render();
+}
+
+function addContent(subjectId, text){
+  if(!text || !text.trim()) return;
+  const id = uid('c');
+  state.contents.push({id,subjectId,text:text.trim(),createdAt:Date.now()});
+  saveState(); render();
+}
+
+function deleteContent(id){
+  state.contents = state.contents.filter(c=>c.id!==id); saveState(); render();
+}
+
+function addExam(subjectId, title, date){
+  if(!date) return alert('Escolha uma data para a prova.');
+  const id = uid('e');
+  state.exams.push({id,subjectId,title:title.trim(),date}); saveState(); render();
+}
+
+function deleteExam(id){
+  state.exams = state.exams.filter(e=>e.id!==id); saveState(); render();
+}
+
+/* Abrir "modal" simples: aqui apenas mostra alert com detalhes e opções */
+function openSubjectModal(subjectId){
+  const s = state.subjects.find(x=>x.id===subjectId);
+  if(!s) return;
+  const tasks = state.tasks.filter(t=>t.subjectId===subjectId).map(t=> (t.done? '✔ ':'') + t.text ).join('\\n') || '—';
+  const contents = state.contents.filter(c=>c.subjectId===subjectId).map(c=>c.text).join('\\n') || '—';
+  const exams = state.exams.filter(e=>e.subjectId===subjectId).map(e=>`${e.title} — ${e.date}`).join('\\n') || '—';
+  alert(`Matéria: ${s.name}\\nCategoria: ${s.category}\\n\\nTarefas:\\n${tasks}\\n\\nConteúdos:\\n${contents}\\n\\nProvas:\\n${exams}`);
+}
+
+/* ====== Eventos e inicialização ====== */
+function bind(){
+  // adicionar matéria
+  byId('addSubjectBtn').addEventListener('click', ()=> {
+    addSubject(byId('newSubjectName').value, byId('newSubjectCategory').value);
+    byId('newSubjectName').value = '';
+  });
+  // adicionar tarefa (botão)
+  byId('addTaskBtn').addEventListener('click', ()=> {
+    addTask(byId('taskSubjectSelect').value, byId('newTaskText').value);
+    byId('newTaskText').value = '';
+  });
+  // adicionar tarefa com Enter
+  byId('newTaskText').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); addTask(byId('taskSubjectSelect').value, byId('newTaskText').value); byId('newTaskText').value=''; }
+  });
+
+  // adicionar conteúdo
+  byId('addContentBtn').addEventListener('click', ()=> {
+    addContent(byId('contentSubjectSelect').value, byId('newContentText').value);
+    byId('newContentText').value = '';
+  });
+  byId('newContentText').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); addContent(byId('contentSubjectSelect').value, byId('newContentText').value); byId('newContentText').value=''; }
+  });
+
+  // adicionar prova
+  byId('addExamBtn').addEventListener('click', ()=> {
+    addExam(byId('examSubjectSelect').value, byId('examTitle').value || 'Prova', byId('examDate').value);
+    byId('examTitle').value=''; byId('examDate').value='';
+  });
+
+  // global search
+  byId('globalSearch').addEventListener('input', ()=> render());
+
+  // delegação para ações de listas (tarefas, conteúdos, provas)
+  document.addEventListener('click', (e)=>{
+    const del = e.target.closest('button[data-action]');
+    if(del){
+      const action = del.getAttribute('data-action');
+      const id = del.getAttribute('data-id');
+      if(action === 'delete') deleteTask(id);
+      if(action === 'deleteContent') deleteContent(id);
+      if(action === 'deleteExam') deleteExam(id);
+    }
+  });
+
+  // checkbox toggle tarefas
+  document.addEventListener('change', (e)=>{
+    if(e.target && e.target.matches('input[type="checkbox"][data-id]')){
+      const id = e.target.getAttribute('data-id');
+      toggleTaskDone(id);
+    }
+  });
+
+  // salvar info escolar
+  byId('schoolInfo').addEventListener('input', (e)=>{
+    state.schoolInfo = e.target.value; saveState();
+  });
+
+  // adicionar matéria com Enter no campo
+  byId('newSubjectName').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); byId('addSubjectBtn').click(); }
+  });
+
+  // escuta para limpar busca com Escape
+  byId('globalSearch').addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){ e.target.value=''; render(); }
+  });
+
+  // salvar automaticamente a cada 2s (redundante com saves imediatos, mas garante persistência)
+  setInterval(saveState, 2000);
+}
+
+/* ====== Helpers ====== */
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[s]));
+}
+
+/* Inicialização */
+loadState();
+bind();
+render();
 </script>
-
 </body>
 </html>
