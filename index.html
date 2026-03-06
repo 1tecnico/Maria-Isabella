@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>Mochila Escolar</title>
@@ -13,7 +13,7 @@ background:#e8f5e9;
 }
 
 header{
-background:#a8e6cf;
+background:#a5d6a7;
 padding:20px;
 text-align:center;
 }
@@ -22,24 +22,28 @@ nav{
 display:flex;
 justify-content:center;
 gap:10px;
-background:#dcedc1;
+background:#c8e6c9;
 padding:10px;
 }
 
 nav button{
-padding:10px;
+padding:10px 15px;
 border:none;
 background:#81c784;
+border-radius:6px;
 cursor:pointer;
-border-radius:5px;
 }
 
-section{
+nav button:hover{
+background:#66bb6a;
+}
+
+.aba{
 display:none;
 padding:20px;
 }
 
-section.ativo{
+.ativa{
 display:block;
 }
 
@@ -48,13 +52,9 @@ padding:8px;
 margin:5px;
 }
 
-button{
-cursor:pointer;
-}
-
 .materia{
 background:white;
-padding:10px;
+padding:12px;
 margin-top:10px;
 border-radius:6px;
 box-shadow:0 2px 5px rgba(0,0,0,0.1);
@@ -75,16 +75,19 @@ color:gray;
 </header>
 
 <nav>
-<button onclick="mostrar('mochila')">Mochila</button>
-<button onclick="mostrar('provas')">Calendário de Provas</button>
-<button onclick="mostrar('info')">Informações</button>
+<button onclick="abrirAba('mochila')">🎒 Mochila</button>
+<button onclick="abrirAba('provas')">📅 Calendário de Provas</button>
+<button onclick="abrirAba('info')">ℹ Informações Escolares</button>
 </nav>
 
-<section id="mochila" class="ativo">
+<!-- MOCHILA -->
+
+<div id="mochila" class="aba ativa">
 
 <h2>Matérias</h2>
 
 <input id="pesquisa" placeholder="Pesquisar matéria">
+
 <br>
 
 <input id="materiaNome" placeholder="Nome da matéria">
@@ -100,9 +103,11 @@ color:gray;
 
 <div id="listaMaterias"></div>
 
-</section>
+</div>
 
-<section id="provas">
+<!-- PROVAS -->
+
+<div id="provas" class="aba">
 
 <h2>Calendário de Provas</h2>
 
@@ -113,32 +118,40 @@ color:gray;
 
 <ul id="listaProvas"></ul>
 
-</section>
+</div>
 
-<section id="info">
+<!-- INFORMAÇÕES -->
+
+<div id="info" class="aba">
 
 <h2>Informações Escolares</h2>
 
-<textarea id="infoTexto" rows="6" style="width:100%"></textarea>
+<textarea id="infoTexto" rows="8" style="width:100%" placeholder="Anotações da escola..."></textarea>
+
+<br><br>
 
 <button onclick="salvarInfo()">Salvar</button>
 
-</section>
+</div>
 
 <script>
 
 let materias = JSON.parse(localStorage.getItem("materias")) || []
 let provas = JSON.parse(localStorage.getItem("provas")) || []
 
-function salvar(){
-localStorage.setItem("materias",JSON.stringify(materias))
+function abrirAba(nome){
+
+document.querySelectorAll(".aba").forEach(a=>{
+a.classList.remove("ativa")
+})
+
+document.getElementById(nome).classList.add("ativa")
+
 }
 
-function mostrar(id){
+function salvar(){
 
-document.querySelectorAll("section").forEach(sec=>sec.classList.remove("ativo"))
-
-document.getElementById(id).classList.add("ativo")
+localStorage.setItem("materias",JSON.stringify(materias))
 
 }
 
@@ -176,11 +189,11 @@ render()
 
 function addTarefa(i){
 
-let texto=prompt("Nova tarefa")
+let t=prompt("Nova tarefa")
 
-if(!texto) return
+if(!t) return
 
-materias[i].tarefas.push({texto:texto,done:false})
+materias[i].tarefas.push({texto:t,done:false})
 
 salvar()
 
@@ -210,11 +223,11 @@ render()
 
 function addConteudo(i){
 
-let texto=prompt("Conteúdo estudado")
+let c=prompt("Conteúdo estudado")
 
-if(!texto) return
+if(!c) return
 
-materias[i].conteudos.push(texto)
+materias[i].conteudos.push(c)
 
 salvar()
 
@@ -249,13 +262,15 @@ let div=document.createElement("div")
 div.className="materia"
 
 div.innerHTML=`
+
 <h3>${m.nome} (${m.categoria})</h3>
 
-<button onclick="excluirMateria(${i})">Excluir</button>
+<button onclick="excluirMateria(${i})">Excluir Matéria</button>
 
 <h4>Tarefas</h4>
 
 <ul>
+
 ${m.tarefas.map((t,ti)=>`
 <li class="${t.done?'concluida':''}">
 ${t.texto}
@@ -263,6 +278,7 @@ ${t.texto}
 <button onclick="excluirTarefa(${i},${ti})">❌</button>
 </li>
 `).join("")}
+
 </ul>
 
 <button onclick="addTarefa(${i})">Adicionar tarefa</button>
@@ -270,12 +286,14 @@ ${t.texto}
 <h4>Conteúdos</h4>
 
 <ul>
+
 ${m.conteudos.map((c,ci)=>`
 <li>
 ${c}
 <button onclick="excluirConteudo(${i},${ci})">❌</button>
 </li>
 `).join("")}
+
 </ul>
 
 <button onclick="addConteudo(${i})">Adicionar conteúdo</button>
