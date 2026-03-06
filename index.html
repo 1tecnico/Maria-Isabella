@@ -2,93 +2,67 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Escolar Digital</title>
+<title>Mochila Escolar</title>
 
 <style>
 
 body{
-font-family:Arial;
+font-family: Arial;
 margin:0;
-background:#eef7f1;
+background:#e8f5e9;
 }
 
 header{
-background:#8fd3a8;
+background:#a8e6cf;
 padding:20px;
 text-align:center;
-color:#1f3d2b;
 }
 
 nav{
 display:flex;
 justify-content:center;
-background:#b8e0c7;
 gap:10px;
+background:#dcedc1;
 padding:10px;
-flex-wrap:wrap;
 }
 
 nav button{
-background:#7bcfa0;
+padding:10px;
 border:none;
-padding:10px 15px;
-border-radius:8px;
+background:#81c784;
 cursor:pointer;
+border-radius:5px;
 }
 
-.container{
-max-width:1000px;
-margin:auto;
+section{
+display:none;
 padding:20px;
+}
+
+section.ativo{
+display:block;
 }
 
 input,select{
 padding:8px;
-border-radius:6px;
-border:1px solid #cfe7d6;
-margin:5px 0;
+margin:5px;
 }
 
 button{
-padding:8px 12px;
-border:none;
-border-radius:6px;
 cursor:pointer;
-margin:3px;
 }
 
-.add{background:#7bcfa0;color:white;}
-.delete{background:#e57373;color:white;}
-
-.card{
+.materia{
 background:white;
-padding:15px;
-border-radius:10px;
-margin-top:15px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
-}
-
-.tarefa{
-display:flex;
-justify-content:space-between;
-margin-top:5px;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
 .concluida{
 text-decoration:line-through;
 color:gray;
-}
-
-.hidden{display:none;}
-
-.categoria{
-margin-top:30px;
-}
-
-.categoria h3{
-color:#2e6f4f;
-border-bottom:2px solid #b8e0c7;
 }
 
 </style>
@@ -102,307 +76,269 @@ border-bottom:2px solid #b8e0c7;
 
 <nav>
 <button onclick="mostrar('mochila')">Mochila</button>
-<button onclick="mostrar('conteudos')">Conteúdos</button>
 <button onclick="mostrar('provas')">Calendário de Provas</button>
 <button onclick="mostrar('info')">Informações</button>
 </nav>
 
-<div class="container">
+<section id="mochila" class="ativo">
 
-<input id="pesquisa" placeholder="Pesquisar...">
+<h2>Matérias</h2>
 
-<!-- MOCHILA -->
-<div id="mochila">
+<input id="pesquisa" placeholder="Pesquisar matéria">
+<br>
 
-<input id="materiaInput" placeholder="Nome da matéria">
+<input id="materiaNome" placeholder="Nome da matéria">
 
-<select id="categoriaSelect">
-<option value="Exatas">Exatas</option>
-<option value="Humanas">Humanas</option>
-<option value="Itinerarios">Itinerários</option>
-<option value="Curso">Curso</option>
+<select id="categoria">
+<option>Exatas</option>
+<option>Humanas</option>
+<option>Itinerários</option>
+<option>Curso</option>
 </select>
 
-<button class="add" onclick="addMateria()">Adicionar</button>
+<button onclick="addMateria()">Adicionar</button>
 
 <div id="listaMaterias"></div>
 
-</div>
+</section>
 
-<!-- CONTEUDOS -->
-<div id="conteudos" class="hidden">
-
-<h2>Conteúdos</h2>
-
-<input id="conteudoInput" placeholder="Novo conteúdo">
-<button class="add" onclick="addConteudo()">Adicionar</button>
-
-<div id="listaConteudos"></div>
-
-</div>
-
-<!-- PROVAS -->
-<div id="provas" class="hidden">
+<section id="provas">
 
 <h2>Calendário de Provas</h2>
 
 <input id="provaNome" placeholder="Nome da prova">
 <input type="date" id="provaData">
 
-<button class="add" onclick="addProva()">Adicionar</button>
+<button onclick="addProva()">Adicionar</button>
 
-<div id="listaProvas"></div>
+<ul id="listaProvas"></ul>
 
-</div>
+</section>
 
-<!-- INFO -->
-<div id="info" class="hidden">
+<section id="info">
 
 <h2>Informações Escolares</h2>
 
-<textarea id="infoTexto" style="width:100%;height:120px"></textarea>
-<br>
-<button class="add" onclick="salvarInfo()">Salvar</button>
+<textarea id="infoTexto" rows="6" style="width:100%"></textarea>
 
-</div>
+<button onclick="salvarInfo()">Salvar</button>
 
-</div>
+</section>
 
 <script>
 
-let materias=JSON.parse(localStorage.getItem("materias"))||[];
-let conteudos=JSON.parse(localStorage.getItem("conteudos"))||[];
-let provas=JSON.parse(localStorage.getItem("provas"))||[];
-let info=localStorage.getItem("info")||"";
-
-const categorias=["Exatas","Humanas","Itinerarios","Curso"];
+let materias = JSON.parse(localStorage.getItem("materias")) || []
+let provas = JSON.parse(localStorage.getItem("provas")) || []
 
 function salvar(){
-
-localStorage.setItem("materias",JSON.stringify(materias));
-localStorage.setItem("conteudos",JSON.stringify(conteudos));
-localStorage.setItem("provas",JSON.stringify(provas));
-localStorage.setItem("info",info);
-
+localStorage.setItem("materias",JSON.stringify(materias))
 }
 
-function mostrar(sec){
+function mostrar(id){
 
-["mochila","conteudos","provas","info"].forEach(id=>{
-document.getElementById(id).classList.add("hidden");
-});
+document.querySelectorAll("section").forEach(sec=>sec.classList.remove("ativo"))
 
-document.getElementById(sec).classList.remove("hidden");
-
-}
-
-function render(){
-
-renderMaterias();
-renderConteudos();
-renderProvas();
-document.getElementById("infoTexto").value=info;
-
-salvar();
-
-}
-
-function renderMaterias(){
-
-let container=document.getElementById("listaMaterias");
-container.innerHTML="";
-
-categorias.forEach(cat=>{
-
-let bloco=document.createElement("div");
-bloco.className="categoria";
-
-let html="";
-
-materias.forEach((m,i)=>{
-
-if(m.categoria!==cat)return;
-
-let tarefas="";
-
-m.tarefas.forEach((t,j)=>{
-
-tarefas+=`
-<div class="tarefa">
-<span class="${t.concluida?'concluida':''}">${t.nome}</span>
-<div>
-<button onclick="concluir(${i},${j})">✔</button>
-<button class="delete" onclick="excluirTarefa(${i},${j})">X</button>
-</div>
-</div>
-`;
-
-});
-
-html+=`
-
-<div class="card">
-
-<b>${m.nome}</b>
-
-<br>
-
-<input id="tarefa${i}" placeholder="Nova tarefa">
-<button class="add" onclick="addTarefa(${i})">Adicionar</button>
-<button class="delete" onclick="excluirMateria(${i})">Excluir matéria</button>
-
-${tarefas}
-
-</div>
-
-`;
-
-});
-
-bloco.innerHTML=`<h3>${cat}</h3>${html}`;
-
-container.appendChild(bloco);
-
-});
+document.getElementById(id).classList.add("ativo")
 
 }
 
 function addMateria(){
 
-let nome=document.getElementById("materiaInput").value.trim();
-let cat=document.getElementById("categoriaSelect").value;
+let nome=document.getElementById("materiaNome").value
+let cat=document.getElementById("categoria").value
 
-if(nome==="")return;
+if(nome=="") return
 
-materias.push({nome:nome,categoria:cat,tarefas:[]});
+materias.push({
+nome:nome,
+categoria:cat,
+tarefas:[],
+conteudos:[]
+})
 
-document.getElementById("materiaInput").value="";
+document.getElementById("materiaNome").value=""
 
-render();
+salvar()
+
+render()
 
 }
 
 function excluirMateria(i){
 
-materias.splice(i,1);
-render();
+materias.splice(i,1)
+
+salvar()
+
+render()
 
 }
 
 function addTarefa(i){
 
-let input=document.getElementById("tarefa"+i);
-let nome=input.value.trim();
+let texto=prompt("Nova tarefa")
 
-if(nome==="")return;
+if(!texto) return
 
-materias[i].tarefas.push({nome:nome,concluida:false});
+materias[i].tarefas.push({texto:texto,done:false})
 
-input.value="";
+salvar()
 
-render();
-
-}
-
-function concluir(i,j){
-
-materias[i].tarefas[j].concluida=!materias[i].tarefas[j].concluida;
-render();
+render()
 
 }
 
-function excluirTarefa(i,j){
+function concluirTarefa(mi,ti){
 
-materias[i].tarefas.splice(j,1);
-render();
+materias[mi].tarefas[ti].done=!materias[mi].tarefas[ti].done
 
-}
+salvar()
 
-function addConteudo(){
-
-let nome=document.getElementById("conteudoInput").value.trim();
-if(nome==="")return;
-
-conteudos.push(nome);
-
-document.getElementById("conteudoInput").value="";
-
-render();
+render()
 
 }
 
-function renderConteudos(){
+function excluirTarefa(mi,ti){
 
-let div=document.getElementById("listaConteudos");
-div.innerHTML="";
+materias[mi].tarefas.splice(ti,1)
 
-conteudos.forEach((c,i)=>{
+salvar()
 
-div.innerHTML+=`
-<div class="card">
+render()
+
+}
+
+function addConteudo(i){
+
+let texto=prompt("Conteúdo estudado")
+
+if(!texto) return
+
+materias[i].conteudos.push(texto)
+
+salvar()
+
+render()
+
+}
+
+function excluirConteudo(mi,ci){
+
+materias[mi].conteudos.splice(ci,1)
+
+salvar()
+
+render()
+
+}
+
+function render(){
+
+let lista=document.getElementById("listaMaterias")
+
+lista.innerHTML=""
+
+let pesquisa=document.getElementById("pesquisa").value.toLowerCase()
+
+materias.forEach((m,i)=>{
+
+if(!m.nome.toLowerCase().includes(pesquisa)) return
+
+let div=document.createElement("div")
+
+div.className="materia"
+
+div.innerHTML=`
+<h3>${m.nome} (${m.categoria})</h3>
+
+<button onclick="excluirMateria(${i})">Excluir</button>
+
+<h4>Tarefas</h4>
+
+<ul>
+${m.tarefas.map((t,ti)=>`
+<li class="${t.done?'concluida':''}">
+${t.texto}
+<button onclick="concluirTarefa(${i},${ti})">✔</button>
+<button onclick="excluirTarefa(${i},${ti})">❌</button>
+</li>
+`).join("")}
+</ul>
+
+<button onclick="addTarefa(${i})">Adicionar tarefa</button>
+
+<h4>Conteúdos</h4>
+
+<ul>
+${m.conteudos.map((c,ci)=>`
+<li>
 ${c}
-<button class="delete" onclick="excluirConteudo(${i})">Excluir</button>
-</div>
-`;
+<button onclick="excluirConteudo(${i},${ci})">❌</button>
+</li>
+`).join("")}
+</ul>
 
-});
+<button onclick="addConteudo(${i})">Adicionar conteúdo</button>
 
-}
+`
 
-function excluirConteudo(i){
+lista.appendChild(div)
 
-conteudos.splice(i,1);
-render();
+})
 
 }
 
 function addProva(){
 
-let nome=document.getElementById("provaNome").value.trim();
-let data=document.getElementById("provaData").value;
+let nome=document.getElementById("provaNome").value
+let data=document.getElementById("provaData").value
 
-if(nome==="")return;
+if(!nome || !data) return
 
-provas.push({nome:nome,data:data});
+provas.push({nome,data})
 
-document.getElementById("provaNome").value="";
-render();
+localStorage.setItem("provas",JSON.stringify(provas))
+
+renderProvas()
 
 }
 
 function renderProvas(){
 
-let div=document.getElementById("listaProvas");
-div.innerHTML="";
+let lista=document.getElementById("listaProvas")
 
-provas.forEach((p,i)=>{
+lista.innerHTML=""
 
-div.innerHTML+=`
-<div class="card">
-${p.nome} - ${p.data}
-<button class="delete" onclick="excluirProva(${i})">Excluir</button>
-</div>
-`;
+provas.forEach(p=>{
 
-});
+let li=document.createElement("li")
 
-}
+li.innerText=p.nome+" - "+p.data
 
-function excluirProva(i){
+lista.appendChild(li)
 
-provas.splice(i,1);
-render();
+})
 
 }
 
 function salvarInfo(){
 
-info=document.getElementById("infoTexto").value;
-render();
+let texto=document.getElementById("infoTexto").value
+
+localStorage.setItem("info",texto)
 
 }
 
-render();
+document.getElementById("infoTexto").value=localStorage.getItem("info")||""
+
+document.getElementById("pesquisa").addEventListener("input",render)
+
+document.getElementById("materiaNome").addEventListener("keypress",e=>{
+if(e.key==="Enter") addMateria()
+})
+
+render()
+renderProvas()
 
 </script>
 
