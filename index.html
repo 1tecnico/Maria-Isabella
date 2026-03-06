@@ -8,16 +8,33 @@
 <style>
 
 body{
-font-family:Arial, sans-serif;
+font-family:Arial;
 margin:0;
 background:#eef7f1;
 }
 
 header{
 background:#8fd3a8;
-color:#1f3d2b;
-text-align:center;
 padding:20px;
+text-align:center;
+color:#1f3d2b;
+}
+
+nav{
+display:flex;
+justify-content:center;
+background:#b8e0c7;
+gap:10px;
+padding:10px;
+flex-wrap:wrap;
+}
+
+nav button{
+background:#7bcfa0;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+cursor:pointer;
 }
 
 .container{
@@ -26,7 +43,7 @@ margin:auto;
 padding:20px;
 }
 
-input, select{
+input,select{
 padding:8px;
 border-radius:6px;
 border:1px solid #cfe7d6;
@@ -38,35 +55,18 @@ padding:8px 12px;
 border:none;
 border-radius:6px;
 cursor:pointer;
-margin-left:5px;
+margin:3px;
 }
 
-.add{
-background:#7bcfa0;
-color:white;
-}
+.add{background:#7bcfa0;color:white;}
+.delete{background:#e57373;color:white;}
 
-.delete{
-background:#e57373;
-color:white;
-}
-
-.materia{
+.card{
 background:white;
 padding:15px;
 border-radius:10px;
 margin-top:15px;
 box-shadow:0 2px 6px rgba(0,0,0,0.08);
-}
-
-.categoria{
-margin-top:30px;
-}
-
-.categoria h2{
-color:#2e6f4f;
-border-bottom:2px solid #b8e0c7;
-padding-bottom:5px;
 }
 
 .tarefa{
@@ -80,9 +80,15 @@ text-decoration:line-through;
 color:gray;
 }
 
-.search{
-width:100%;
-margin-bottom:15px;
+.hidden{display:none;}
+
+.categoria{
+margin-top:30px;
+}
+
+.categoria h3{
+color:#2e6f4f;
+border-bottom:2px solid #b8e0c7;
 }
 
 </style>
@@ -94,11 +100,19 @@ margin-bottom:15px;
 <h1>🎒 Mochila Escolar Digital</h1>
 </header>
 
+<nav>
+<button onclick="mostrar('mochila')">Mochila</button>
+<button onclick="mostrar('conteudos')">Conteúdos</button>
+<button onclick="mostrar('provas')">Calendário de Provas</button>
+<button onclick="mostrar('info')">Informações</button>
+</nav>
+
 <div class="container">
 
-<input id="pesquisa" class="search" placeholder="Pesquisar matéria ou tarefa...">
+<input id="pesquisa" placeholder="Pesquisar...">
 
-<br>
+<!-- MOCHILA -->
+<div id="mochila">
 
 <input id="materiaInput" placeholder="Nome da matéria">
 
@@ -106,55 +120,116 @@ margin-bottom:15px;
 <option value="Exatas">Exatas</option>
 <option value="Humanas">Humanas</option>
 <option value="Itinerarios">Itinerários</option>
-<option value="Curso">Matérias do Curso</option>
+<option value="Curso">Curso</option>
 </select>
 
 <button class="add" onclick="addMateria()">Adicionar</button>
 
-<div id="categorias"></div>
+<div id="listaMaterias"></div>
+
+</div>
+
+<!-- CONTEUDOS -->
+<div id="conteudos" class="hidden">
+
+<h2>Conteúdos</h2>
+
+<input id="conteudoInput" placeholder="Novo conteúdo">
+<button class="add" onclick="addConteudo()">Adicionar</button>
+
+<div id="listaConteudos"></div>
+
+</div>
+
+<!-- PROVAS -->
+<div id="provas" class="hidden">
+
+<h2>Calendário de Provas</h2>
+
+<input id="provaNome" placeholder="Nome da prova">
+<input type="date" id="provaData">
+
+<button class="add" onclick="addProva()">Adicionar</button>
+
+<div id="listaProvas"></div>
+
+</div>
+
+<!-- INFO -->
+<div id="info" class="hidden">
+
+<h2>Informações Escolares</h2>
+
+<textarea id="infoTexto" style="width:100%;height:120px"></textarea>
+<br>
+<button class="add" onclick="salvarInfo()">Salvar</button>
+
+</div>
 
 </div>
 
 <script>
 
-let materias = JSON.parse(localStorage.getItem("materias")) || [];
+let materias=JSON.parse(localStorage.getItem("materias"))||[];
+let conteudos=JSON.parse(localStorage.getItem("conteudos"))||[];
+let provas=JSON.parse(localStorage.getItem("provas"))||[];
+let info=localStorage.getItem("info")||"";
 
-const categorias = ["Exatas","Humanas","Itinerarios","Curso"];
+const categorias=["Exatas","Humanas","Itinerarios","Curso"];
 
 function salvar(){
-localStorage.setItem("materias", JSON.stringify(materias));
+
+localStorage.setItem("materias",JSON.stringify(materias));
+localStorage.setItem("conteudos",JSON.stringify(conteudos));
+localStorage.setItem("provas",JSON.stringify(provas));
+localStorage.setItem("info",info);
+
+}
+
+function mostrar(sec){
+
+["mochila","conteudos","provas","info"].forEach(id=>{
+document.getElementById(id).classList.add("hidden");
+});
+
+document.getElementById(sec).classList.remove("hidden");
+
 }
 
 function render(){
 
-const pesquisa = document.getElementById("pesquisa").value.toLowerCase();
-const container = document.getElementById("categorias");
+renderMaterias();
+renderConteudos();
+renderProvas();
+document.getElementById("infoTexto").value=info;
+
+salvar();
+
+}
+
+function renderMaterias(){
+
+let container=document.getElementById("listaMaterias");
 container.innerHTML="";
 
-categorias.forEach(cat => {
+categorias.forEach(cat=>{
 
-let divCat = document.createElement("div");
-divCat.className="categoria";
+let bloco=document.createElement("div");
+bloco.className="categoria";
 
-let conteudo="";
+let html="";
 
-materias
-.filter(m=>m.categoria===cat)
-.forEach((m,i)=>{
+materias.forEach((m,i)=>{
 
-let tarefasHTML="";
+if(m.categoria!==cat)return;
+
+let tarefas="";
 
 m.tarefas.forEach((t,j)=>{
 
-if(
-m.nome.toLowerCase().includes(pesquisa) ||
-t.nome.toLowerCase().includes(pesquisa)
-){
-
-tarefasHTML+=`
+tarefas+=`
 <div class="tarefa">
 <span class="${t.concluida?'concluida':''}">${t.nome}</span>
-
 <div>
 <button onclick="concluir(${i},${j})">✔</button>
 <button class="delete" onclick="excluirTarefa(${i},${j})">X</button>
@@ -162,23 +237,21 @@ tarefasHTML+=`
 </div>
 `;
 
-}
-
 });
 
-if(pesquisa && tarefasHTML=="" && !m.nome.toLowerCase().includes(pesquisa)) return;
+html+=`
 
-conteudo+=`
+<div class="card">
 
-<div class="materia">
+<b>${m.nome}</b>
 
-<h3>${m.nome}</h3>
+<br>
 
 <input id="tarefa${i}" placeholder="Nova tarefa">
 <button class="add" onclick="addTarefa(${i})">Adicionar</button>
-<button class="delete" onclick="excluirMateria(${i})">Excluir</button>
+<button class="delete" onclick="excluirMateria(${i})">Excluir matéria</button>
 
-${tarefasHTML}
+${tarefas}
 
 </div>
 
@@ -186,84 +259,148 @@ ${tarefasHTML}
 
 });
 
-divCat.innerHTML=`<h2>${cat}</h2>${conteudo}`;
+bloco.innerHTML=`<h3>${cat}</h3>${html}`;
 
-container.appendChild(divCat);
+container.appendChild(bloco);
 
 });
 
-salvar();
 }
 
 function addMateria(){
 
-const input=document.getElementById("materiaInput");
-const cat=document.getElementById("categoriaSelect");
+let nome=document.getElementById("materiaInput").value.trim();
+let cat=document.getElementById("categoriaSelect").value;
 
-const nome=input.value.trim();
-if(nome==="") return;
+if(nome==="")return;
 
-materias.push({
-nome:nome,
-categoria:cat.value,
-tarefas:[]
-});
+materias.push({nome:nome,categoria:cat,tarefas:[]});
 
-input.value="";
+document.getElementById("materiaInput").value="";
 
 render();
+
 }
 
 function excluirMateria(i){
+
 materias.splice(i,1);
 render();
+
 }
 
 function addTarefa(i){
 
-const input=document.getElementById("tarefa"+i);
-const nome=input.value.trim();
+let input=document.getElementById("tarefa"+i);
+let nome=input.value.trim();
 
-if(nome==="") return;
+if(nome==="")return;
 
-materias[i].tarefas.push({
-nome:nome,
-concluida:false
-});
+materias[i].tarefas.push({nome:nome,concluida:false});
 
 input.value="";
 
 render();
-}
 
-function excluirTarefa(i,j){
-materias[i].tarefas.splice(j,1);
-render();
 }
 
 function concluir(i,j){
+
 materias[i].tarefas[j].concluida=!materias[i].tarefas[j].concluida;
 render();
+
 }
 
-document.getElementById("pesquisa").addEventListener("input", render);
+function excluirTarefa(i,j){
 
-document.getElementById("materiaInput").addEventListener("keypress", function(e){
-if(e.key==="Enter"){
-e.preventDefault();
-addMateria();
+materias[i].tarefas.splice(j,1);
+render();
+
 }
+
+function addConteudo(){
+
+let nome=document.getElementById("conteudoInput").value.trim();
+if(nome==="")return;
+
+conteudos.push(nome);
+
+document.getElementById("conteudoInput").value="";
+
+render();
+
+}
+
+function renderConteudos(){
+
+let div=document.getElementById("listaConteudos");
+div.innerHTML="";
+
+conteudos.forEach((c,i)=>{
+
+div.innerHTML+=`
+<div class="card">
+${c}
+<button class="delete" onclick="excluirConteudo(${i})">Excluir</button>
+</div>
+`;
+
 });
 
-document.addEventListener("keypress", function(e){
-
-if(e.key==="Enter" && e.target.id.startsWith("tarefa")){
-e.preventDefault();
-let index = e.target.id.replace("tarefa","");
-addTarefa(index);
 }
 
+function excluirConteudo(i){
+
+conteudos.splice(i,1);
+render();
+
+}
+
+function addProva(){
+
+let nome=document.getElementById("provaNome").value.trim();
+let data=document.getElementById("provaData").value;
+
+if(nome==="")return;
+
+provas.push({nome:nome,data:data});
+
+document.getElementById("provaNome").value="";
+render();
+
+}
+
+function renderProvas(){
+
+let div=document.getElementById("listaProvas");
+div.innerHTML="";
+
+provas.forEach((p,i)=>{
+
+div.innerHTML+=`
+<div class="card">
+${p.nome} - ${p.data}
+<button class="delete" onclick="excluirProva(${i})">Excluir</button>
+</div>
+`;
+
 });
+
+}
+
+function excluirProva(i){
+
+provas.splice(i,1);
+render();
+
+}
+
+function salvarInfo(){
+
+info=document.getElementById("infoTexto").value;
+render();
+
+}
 
 render();
 
