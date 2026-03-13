@@ -6,122 +6,121 @@
 <title>Mochila Escolar</title>
 
 <style>
-
 :root{
---verde1:#b7e4c7;
---verde2:#95d5b2;
---verde3:#d8f3dc;
---fundo:#f1fff6;
---texto:#1b4332;
+  --verde1:#b7e4c7;
+  --verde2:#95d5b2;
+  --verde3:#d8f3dc;
+  --fundo:#f1fff6;
+  --texto:#1b4332;
 }
 
+*{box-sizing:border-box}
+
 body{
-margin:0;
-font-family:Segoe UI, Arial;
-background:var(--fundo);
-color:var(--texto);
+  margin:0;
+  font-family:Segoe UI, Arial, sans-serif;
+  background:var(--fundo);
+  color:var(--texto);
 }
 
 header{
-background:var(--verde1);
-padding:20px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  background:var(--verde1);
+  padding:20px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
 nav{
-display:flex;
-justify-content:center;
-gap:10px;
-background:var(--verde3);
-padding:10px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  background:var(--verde3);
+  padding:10px;
 }
 
 nav button{
-background:var(--verde2);
-border:none;
-padding:10px 15px;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
+  background:var(--verde2);
+  border:none;
+  padding:10px 15px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
 }
 
 .container{
-max-width:900px;
-margin:auto;
-padding:20px;
+  max-width:1000px;
+  margin:auto;
+  padding:20px;
 }
 
 .card{
-background:white;
-padding:20px;
-border-radius:15px;
-box-shadow:0 8px 20px rgba(0,0,0,0.08);
-margin-bottom:20px;
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 6px 14px rgba(0,0,0,0.08);
 }
 
 input,select{
-width:100%;
-padding:10px;
-margin:5px 0 10px 0;
-border-radius:8px;
-border:1px solid var(--verde1);
+  width:100%;
+  padding:8px;
+  margin:5px 0 10px;
+  border-radius:8px;
+  border:1px solid var(--verde1);
 }
 
 button{
-padding:8px 12px;
-border:none;
-border-radius:8px;
-cursor:pointer;
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 .btn{
-background:var(--verde2);
+  background:var(--verde2);
 }
 
 .lista-item{
-display:flex;
-justify-content:space-between;
-background:var(--verde3);
-padding:8px;
-border-radius:8px;
-margin-bottom:5px;
+  display:flex;
+  justify-content:space-between;
+  background:var(--verde3);
+  padding:6px;
+  border-radius:6px;
+  margin-bottom:4px;
 }
 
 .categoria{
-background:var(--verde2);
-padding:12px;
-border-radius:10px;
-margin-top:20px;
-cursor:pointer;
-font-weight:bold;
-}
-
-.categoria:hover{
-background:#74c69d;
+  background:var(--verde2);
+  padding:10px;
+  border-radius:10px;
+  margin-top:20px;
+  cursor:pointer;
+  font-weight:bold;
 }
 
 .categoria-conteudo{
-margin-top:10px;
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:15px;
 }
 
 .hidden{
-display:none;
+  display:none;
 }
 
 .concluida{
-text-decoration:line-through;
-opacity:0.6;
+  text-decoration:line-through;
+  opacity:0.6;
 }
 
 footer{
-text-align:center;
-padding:15px;
-background:var(--verde1);
+  text-align:center;
+  padding:15px;
+  background:var(--verde1);
+  margin-top:20px;
 }
-
 </style>
 </head>
 
@@ -140,7 +139,6 @@ background:var(--verde1);
 <div id="materias">
 
 <div class="card">
-
 <h2>Adicionar Matéria</h2>
 
 <input id="nomeMateria" placeholder="Nome da matéria">
@@ -152,8 +150,9 @@ background:var(--verde1);
 </select>
 
 <button class="btn" onclick="addMateria()">Adicionar</button>
-
 </div>
+
+<input id="pesquisaMateria" placeholder="Pesquisar matéria..." oninput="renderMaterias()">
 
 <div id="listaMaterias"></div>
 
@@ -162,7 +161,6 @@ background:var(--verde1);
 <div id="info" class="hidden">
 
 <div class="card">
-
 <h2>Informações Escolares</h2>
 
 <input id="escola" placeholder="Nome da escola">
@@ -173,7 +171,6 @@ background:var(--verde1);
 <button class="btn" onclick="salvarInfo()">Salvar</button>
 
 <div id="mostrarInfo"></div>
-
 </div>
 
 </div>
@@ -181,15 +178,13 @@ background:var(--verde1);
 <div id="provas" class="hidden">
 
 <div class="card">
-
 <h2>Adicionar Prova</h2>
 
 <input id="materiaProva" placeholder="Matéria">
 <input id="dataProva" type="date">
-<input id="conteudoProva" placeholder="Conteúdo">
+<input id="conteudoProva" placeholder="Conteúdo da prova">
 
 <button class="btn" onclick="addProva()">Adicionar</button>
-
 </div>
 
 <div id="listaProvas"></div>
@@ -207,19 +202,16 @@ let provas = JSON.parse(localStorage.getItem("provas")) || [];
 let info = JSON.parse(localStorage.getItem("info")) || {};
 
 function salvar(){
-localStorage.setItem("materias",JSON.stringify(materias));
-localStorage.setItem("provas",JSON.stringify(provas));
-localStorage.setItem("info",JSON.stringify(info));
+  localStorage.setItem("materias",JSON.stringify(materias));
+  localStorage.setItem("provas",JSON.stringify(provas));
+  localStorage.setItem("info",JSON.stringify(info));
 }
 
 function trocarAba(aba){
-
-document.getElementById("materias").classList.add("hidden");
-document.getElementById("info").classList.add("hidden");
-document.getElementById("provas").classList.add("hidden");
-
-document.getElementById(aba).classList.remove("hidden");
-
+  document.getElementById("materias").classList.add("hidden");
+  document.getElementById("info").classList.add("hidden");
+  document.getElementById("provas").classList.add("hidden");
+  document.getElementById(aba).classList.remove("hidden");
 }
 
 function renderMaterias(){
@@ -227,17 +219,21 @@ function renderMaterias(){
 const lista=document.getElementById("listaMaterias");
 lista.innerHTML="";
 
+const pesquisa=(document.getElementById("pesquisaMateria")?.value || "").toLowerCase();
+
 const tipos=["Exatas","Humanas","Informática"];
 
 tipos.forEach(tipo=>{
 
-const grupo=materias.filter(m=>m.tipo===tipo);
+const grupo=materias.filter(m =>
+m.tipo===tipo && m.nome.toLowerCase().includes(pesquisa)
+);
+
+if(grupo.length===0) return;
 
 lista.innerHTML+=`
-<div class="categoria" onclick="toggleCategoria('${tipo}')">
-${tipo}
-</div>
-<div id="cat-${tipo}" class="categoria-conteudo hidden"></div>
+<div class="categoria" onclick="toggleCategoria('${tipo}')">${tipo}</div>
+<div id="cat-${tipo}" class="categoria-conteudo"></div>
 `;
 
 const container=document.getElementById("cat-"+tipo);
@@ -250,23 +246,16 @@ const card=document.createElement("div");
 card.className="card";
 
 card.innerHTML=`
-
 <h3>${m.nome}</h3>
-
 <button onclick="delMateria(${index})">Excluir</button>
 
 <h4>Conteúdos</h4>
-
 <div id="conteudos${index}"></div>
-
 <input id="conteudoInput${index}" placeholder="Novo conteúdo">
 
 <h4>Tarefas</h4>
-
 <div id="tarefas${index}"></div>
-
 <input id="tarefaInput${index}" placeholder="Nova tarefa">
-
 `;
 
 container.appendChild(card);
@@ -274,39 +263,25 @@ container.appendChild(card);
 const conteudos=document.getElementById("conteudos"+index);
 
 m.conteudos.forEach((c,ci)=>{
-
 conteudos.innerHTML+=`
 <div class="lista-item">
 <span>${c}</span>
 <button onclick="delConteudo(${index},${ci})">X</button>
-</div>
-`;
-
+</div>`;
 });
 
 const tarefas=document.getElementById("tarefas"+index);
 
 m.tarefas.forEach((t,ti)=>{
-
 tarefas.innerHTML+=`
 <div class="lista-item">
-
 <div>
-
 <input type="checkbox" ${t.concluida?"checked":""}
 onchange="toggle(${index},${ti})">
-
-<span class="${t.concluida?"concluida":""}">
-${t.texto}
-</span>
-
+<span class="${t.concluida?"concluida":""}">${t.texto}</span>
 </div>
-
 <button onclick="delTarefa(${index},${ti})">X</button>
-
-</div>
-`;
-
+</div>`;
 });
 
 document.getElementById("conteudoInput"+index)
@@ -322,167 +297,113 @@ if(e.key==="Enter") addTarefa(index,e.target.value)
 });
 
 });
-
 }
 
 function toggleCategoria(tipo){
-
 document.getElementById("cat-"+tipo).classList.toggle("hidden");
-
 }
 
 function addMateria(){
-
 const nome=document.getElementById("nomeMateria").value.trim();
 const tipo=document.getElementById("tipoMateria").value;
 
-if(!nome)return alert("Digite o nome");
+if(!nome) return alert("Digite o nome");
 
 materias.push({nome,tipo,conteudos:[],tarefas:[]});
 
 salvar();
 renderMaterias();
-
 document.getElementById("nomeMateria").value="";
-
 }
 
 function delMateria(i){
-
 materias.splice(i,1);
 salvar();
 renderMaterias();
-
 }
 
 function addConteudo(i,v){
-
-if(!v)return;
-
+if(!v) return;
 materias[i].conteudos.push(v);
-
 salvar();
 renderMaterias();
-
 }
 
 function delConteudo(i,ci){
-
 materias[i].conteudos.splice(ci,1);
 salvar();
 renderMaterias();
-
 }
 
 function addTarefa(i,v){
-
-if(!v)return;
-
+if(!v) return;
 materias[i].tarefas.push({texto:v,concluida:false});
-
 salvar();
 renderMaterias();
-
 }
 
 function delTarefa(i,ti){
-
 materias[i].tarefas.splice(ti,1);
 salvar();
 renderMaterias();
-
 }
 
 function toggle(i,ti){
-
 materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida;
-
 salvar();
 renderMaterias();
-
 }
 
 function salvarInfo(){
-
 info={
 escola:document.getElementById("escola").value,
 turma:document.getElementById("turma").value,
 serie:document.getElementById("serie").value,
 professor:document.getElementById("professor").value
 };
-
 salvar();
 mostrarInfo();
-
 }
 
 function mostrarInfo(){
-
 const div=document.getElementById("mostrarInfo");
-
 div.innerHTML=`
-
 <p><b>Escola:</b> ${info.escola||""}</p>
-
 <p><b>Turma:</b> ${info.turma||""}</p>
-
 <p><b>Série:</b> ${info.serie||""}</p>
-
 <p><b>Professor:</b> ${info.professor||""}</p>
-
 `;
-
 }
 
 function addProva(){
-
 const materia=document.getElementById("materiaProva").value;
 const data=document.getElementById("dataProva").value;
 const conteudo=document.getElementById("conteudoProva").value;
 
 provas.push({materia,data,conteudo});
-
 salvar();
 renderProvas();
-
 }
 
 function renderProvas(){
-
 const lista=document.getElementById("listaProvas");
-
 lista.innerHTML="";
 
 provas.forEach((p,i)=>{
-
 lista.innerHTML+=`
-
 <div class="card">
-
 <h3>${p.materia}</h3>
-
 <p><b>Data:</b> ${p.data}</p>
-
 <p><b>Conteúdo:</b> ${p.conteudo}</p>
-
 <button onclick="delProva(${i})">Excluir</button>
-
-</div>
-
-`;
-
+</div>`;
 });
-
 }
 
 function delProva(i){
-
 provas.splice(i,1);
-
 salvar();
-
 renderProvas();
-
 }
 
 document.getElementById("nomeMateria").addEventListener("keydown",e=>{
