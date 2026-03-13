@@ -48,10 +48,6 @@ cursor:pointer;
 font-weight:bold;
 }
 
-nav button:hover{
-background:#74c69d;
-}
-
 .container{
 max-width:900px;
 margin:auto;
@@ -94,13 +90,30 @@ border-radius:8px;
 margin-bottom:5px;
 }
 
-.concluida{
-text-decoration:line-through;
-opacity:0.6;
+.categoria{
+background:var(--verde2);
+padding:12px;
+border-radius:10px;
+margin-top:20px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.categoria:hover{
+background:#74c69d;
+}
+
+.categoria-conteudo{
+margin-top:10px;
 }
 
 .hidden{
 display:none;
+}
+
+.concluida{
+text-decoration:line-through;
+opacity:0.6;
 }
 
 footer{
@@ -157,7 +170,7 @@ background:var(--verde1);
 <input id="serie" placeholder="Série/Ano">
 <input id="professor" placeholder="Professor responsável">
 
-<button class="btn" onclick="salvarInfo()">Salvar Informações</button>
+<button class="btn" onclick="salvarInfo()">Salvar</button>
 
 <div id="mostrarInfo"></div>
 
@@ -173,9 +186,9 @@ background:var(--verde1);
 
 <input id="materiaProva" placeholder="Matéria">
 <input id="dataProva" type="date">
-<input id="conteudoProva" placeholder="Conteúdo da prova">
+<input id="conteudoProva" placeholder="Conteúdo">
 
-<button class="btn" onclick="addProva()">Adicionar Prova</button>
+<button class="btn" onclick="addProva()">Adicionar</button>
 
 </div>
 
@@ -220,31 +233,43 @@ tipos.forEach(tipo=>{
 
 const grupo=materias.filter(m=>m.tipo===tipo);
 
-if(grupo.length===0) return;
+lista.innerHTML+=`
+<div class="categoria" onclick="toggleCategoria('${tipo}')">
+${tipo}
+</div>
+<div id="cat-${tipo}" class="categoria-conteudo hidden"></div>
+`;
 
-lista.innerHTML+=`<h2>${tipo}</h2>`;
+const container=document.getElementById("cat-"+tipo);
 
 grupo.forEach(m=>{
 
-const index = materias.indexOf(m);
+const index=materias.indexOf(m);
 
 const card=document.createElement("div");
 card.className="card";
 
 card.innerHTML=`
+
 <h3>${m.nome}</h3>
+
 <button onclick="delMateria(${index})">Excluir</button>
 
 <h4>Conteúdos</h4>
+
 <div id="conteudos${index}"></div>
+
 <input id="conteudoInput${index}" placeholder="Novo conteúdo">
 
 <h4>Tarefas</h4>
+
 <div id="tarefas${index}"></div>
+
 <input id="tarefaInput${index}" placeholder="Nova tarefa">
+
 `;
 
-lista.appendChild(card);
+container.appendChild(card);
 
 const conteudos=document.getElementById("conteudos"+index);
 
@@ -265,14 +290,20 @@ m.tarefas.forEach((t,ti)=>{
 
 tarefas.innerHTML+=`
 <div class="lista-item">
+
 <div>
+
 <input type="checkbox" ${t.concluida?"checked":""}
 onchange="toggle(${index},${ti})">
+
 <span class="${t.concluida?"concluida":""}">
 ${t.texto}
 </span>
+
 </div>
+
 <button onclick="delTarefa(${index},${ti})">X</button>
+
 </div>
 `;
 
@@ -294,12 +325,18 @@ if(e.key==="Enter") addTarefa(index,e.target.value)
 
 }
 
+function toggleCategoria(tipo){
+
+document.getElementById("cat-"+tipo).classList.toggle("hidden");
+
+}
+
 function addMateria(){
 
 const nome=document.getElementById("nomeMateria").value.trim();
 const tipo=document.getElementById("tipoMateria").value;
 
-if(!nome) return alert("Digite o nome");
+if(!nome)return alert("Digite o nome");
 
 materias.push({nome,tipo,conteudos:[],tarefas:[]});
 
@@ -311,41 +348,58 @@ document.getElementById("nomeMateria").value="";
 }
 
 function delMateria(i){
+
 materias.splice(i,1);
 salvar();
 renderMaterias();
+
 }
 
 function addConteudo(i,v){
-if(!v) return;
+
+if(!v)return;
+
 materias[i].conteudos.push(v);
+
 salvar();
 renderMaterias();
+
 }
 
 function delConteudo(i,ci){
+
 materias[i].conteudos.splice(ci,1);
 salvar();
 renderMaterias();
+
 }
 
 function addTarefa(i,v){
-if(!v) return;
+
+if(!v)return;
+
 materias[i].tarefas.push({texto:v,concluida:false});
+
 salvar();
 renderMaterias();
+
 }
 
 function delTarefa(i,ti){
+
 materias[i].tarefas.splice(ti,1);
 salvar();
 renderMaterias();
+
 }
 
 function toggle(i,ti){
+
 materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida;
+
 salvar();
 renderMaterias();
+
 }
 
 function salvarInfo(){
@@ -367,10 +421,15 @@ function mostrarInfo(){
 const div=document.getElementById("mostrarInfo");
 
 div.innerHTML=`
+
 <p><b>Escola:</b> ${info.escola||""}</p>
+
 <p><b>Turma:</b> ${info.turma||""}</p>
+
 <p><b>Série:</b> ${info.serie||""}</p>
+
 <p><b>Professor:</b> ${info.professor||""}</p>
+
 `;
 
 }
@@ -380,8 +439,6 @@ function addProva(){
 const materia=document.getElementById("materiaProva").value;
 const data=document.getElementById("dataProva").value;
 const conteudo=document.getElementById("conteudoProva").value;
-
-if(!materia) return;
 
 provas.push({materia,data,conteudo});
 
@@ -393,17 +450,25 @@ renderProvas();
 function renderProvas(){
 
 const lista=document.getElementById("listaProvas");
+
 lista.innerHTML="";
 
 provas.forEach((p,i)=>{
 
 lista.innerHTML+=`
+
 <div class="card">
+
 <h3>${p.materia}</h3>
+
 <p><b>Data:</b> ${p.data}</p>
+
 <p><b>Conteúdo:</b> ${p.conteudo}</p>
+
 <button onclick="delProva(${i})">Excluir</button>
+
 </div>
+
 `;
 
 });
@@ -411,18 +476,20 @@ lista.innerHTML+=`
 }
 
 function delProva(i){
+
 provas.splice(i,1);
+
 salvar();
+
 renderProvas();
+
 }
 
-document.getElementById("nomeMateria")
-.addEventListener("keydown",e=>{
+document.getElementById("nomeMateria").addEventListener("keydown",e=>{
 if(e.key==="Enter") addMateria();
 });
 
-document.getElementById("conteudoProva")
-.addEventListener("keydown",e=>{
+document.getElementById("conteudoProva").addEventListener("keydown",e=>{
 if(e.key==="Enter") addProva();
 });
 
