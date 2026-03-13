@@ -11,8 +11,8 @@
 --verde1:#b7e4c7;
 --verde2:#95d5b2;
 --verde3:#d8f3dc;
---fundo:#f0fff4;
---texto:#2d6a4f;
+--fundo:#f1fff6;
+--texto:#1b4332;
 }
 
 body{
@@ -124,11 +124,10 @@ background:var(--verde1);
 
 <div class="container">
 
-<!-- MATÉRIAS -->
-
 <div id="materias">
 
 <div class="card">
+
 <h2>Adicionar Matéria</h2>
 
 <input id="nomeMateria" placeholder="Nome da matéria">
@@ -147,11 +146,10 @@ background:var(--verde1);
 
 </div>
 
-<!-- INFORMAÇÕES -->
-
 <div id="info" class="hidden">
 
 <div class="card">
+
 <h2>Informações Escolares</h2>
 
 <input id="escola" placeholder="Nome da escola">
@@ -167,11 +165,10 @@ background:var(--verde1);
 
 </div>
 
-<!-- PROVAS -->
-
 <div id="provas" class="hidden">
 
 <div class="card">
+
 <h2>Adicionar Prova</h2>
 
 <input id="materiaProva" placeholder="Matéria">
@@ -203,10 +200,13 @@ localStorage.setItem("info",JSON.stringify(info));
 }
 
 function trocarAba(aba){
+
 document.getElementById("materias").classList.add("hidden");
 document.getElementById("info").classList.add("hidden");
 document.getElementById("provas").classList.add("hidden");
+
 document.getElementById(aba).classList.remove("hidden");
+
 }
 
 function renderMaterias(){
@@ -218,46 +218,48 @@ const tipos=["Exatas","Humanas","Informática"];
 
 tipos.forEach(tipo=>{
 
+const grupo=materias.filter(m=>m.tipo===tipo);
+
+if(grupo.length===0) return;
+
 lista.innerHTML+=`<h2>${tipo}</h2>`;
 
-materias
-.filter(m=>m.tipo===tipo)
-.forEach((m,i)=>{
+grupo.forEach(m=>{
+
+const index = materias.indexOf(m);
 
 const card=document.createElement("div");
 card.className="card";
 
 card.innerHTML=`
 <h3>${m.nome}</h3>
-<button onclick="delMateria(${i})">Excluir</button>
+<button onclick="delMateria(${index})">Excluir</button>
 
 <h4>Conteúdos</h4>
-<div id="conteudos${i}"></div>
-<input placeholder="Novo conteúdo"
-onkeydown="if(event.key==='Enter')addConteudo(${i},this.value)">
+<div id="conteudos${index}"></div>
+<input id="conteudoInput${index}" placeholder="Novo conteúdo">
 
 <h4>Tarefas</h4>
-<div id="tarefas${i}"></div>
-<input placeholder="Nova tarefa"
-onkeydown="if(event.key==='Enter')addTarefa(${i},this.value)">
+<div id="tarefas${index}"></div>
+<input id="tarefaInput${index}" placeholder="Nova tarefa">
 `;
 
 lista.appendChild(card);
 
-const conteudos=document.getElementById("conteudos"+i);
+const conteudos=document.getElementById("conteudos"+index);
 
 m.conteudos.forEach((c,ci)=>{
 
 conteudos.innerHTML+=`
 <div class="lista-item">
 <span>${c}</span>
-<button onclick="delConteudo(${i},${ci})">X</button>
+<button onclick="delConteudo(${index},${ci})">X</button>
 </div>
 `;
 
 });
 
-const tarefas=document.getElementById("tarefas"+i);
+const tarefas=document.getElementById("tarefas"+index);
 
 m.tarefas.forEach((t,ti)=>{
 
@@ -265,15 +267,25 @@ tarefas.innerHTML+=`
 <div class="lista-item">
 <div>
 <input type="checkbox" ${t.concluida?"checked":""}
-onchange="toggle(${i},${ti})">
+onchange="toggle(${index},${ti})">
 <span class="${t.concluida?"concluida":""}">
 ${t.texto}
 </span>
 </div>
-<button onclick="delTarefa(${i},${ti})">X</button>
+<button onclick="delTarefa(${index},${ti})">X</button>
 </div>
 `;
 
+});
+
+document.getElementById("conteudoInput"+index)
+.addEventListener("keydown",e=>{
+if(e.key==="Enter") addConteudo(index,e.target.value)
+});
+
+document.getElementById("tarefaInput"+index)
+.addEventListener("keydown",e=>{
+if(e.key==="Enter") addTarefa(index,e.target.value)
 });
 
 });
@@ -287,7 +299,7 @@ function addMateria(){
 const nome=document.getElementById("nomeMateria").value.trim();
 const tipo=document.getElementById("tipoMateria").value;
 
-if(!nome)return alert("Digite o nome");
+if(!nome) return alert("Digite o nome");
 
 materias.push({nome,tipo,conteudos:[],tarefas:[]});
 
@@ -305,7 +317,7 @@ renderMaterias();
 }
 
 function addConteudo(i,v){
-if(!v)return;
+if(!v) return;
 materias[i].conteudos.push(v);
 salvar();
 renderMaterias();
@@ -318,7 +330,7 @@ renderMaterias();
 }
 
 function addTarefa(i,v){
-if(!v)return;
+if(!v) return;
 materias[i].tarefas.push({texto:v,concluida:false});
 salvar();
 renderMaterias();
@@ -369,6 +381,8 @@ const materia=document.getElementById("materiaProva").value;
 const data=document.getElementById("dataProva").value;
 const conteudo=document.getElementById("conteudoProva").value;
 
+if(!materia) return;
+
 provas.push({materia,data,conteudo});
 
 salvar();
@@ -402,11 +416,13 @@ salvar();
 renderProvas();
 }
 
-document.getElementById("nomeMateria").addEventListener("keydown",e=>{
+document.getElementById("nomeMateria")
+.addEventListener("keydown",e=>{
 if(e.key==="Enter") addMateria();
 });
 
-document.getElementById("conteudoProva").addEventListener("keydown",e=>{
+document.getElementById("conteudoProva")
+.addEventListener("keydown",e=>{
 if(e.key==="Enter") addProva();
 });
 
