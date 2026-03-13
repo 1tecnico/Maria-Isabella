@@ -8,11 +8,11 @@
 <style>
 
 :root{
---rosa1:#ffb6c1;
---rosa2:#ff9eb5;
---rosa3:#fff0f5;
---fundo:#ffe6f0;
---texto:#5a2a3a;
+--verde1:#b7e4c7;
+--verde2:#95d5b2;
+--verde3:#d8f3dc;
+--fundo:#f0fff4;
+--texto:#2d6a4f;
 }
 
 body{
@@ -23,7 +23,7 @@ color:var(--texto);
 }
 
 header{
-background:var(--rosa1);
+background:var(--verde1);
 padding:20px;
 text-align:center;
 font-size:24px;
@@ -35,12 +35,12 @@ nav{
 display:flex;
 justify-content:center;
 gap:10px;
-background:var(--rosa3);
+background:var(--verde3);
 padding:10px;
 }
 
 nav button{
-background:var(--rosa2);
+background:var(--verde2);
 border:none;
 padding:10px 15px;
 border-radius:8px;
@@ -49,7 +49,7 @@ font-weight:bold;
 }
 
 nav button:hover{
-background:#ff85a2;
+background:#74c69d;
 }
 
 .container{
@@ -66,12 +66,12 @@ box-shadow:0 8px 20px rgba(0,0,0,0.08);
 margin-bottom:20px;
 }
 
-input{
+input,select{
 width:100%;
 padding:10px;
 margin:5px 0 10px 0;
 border-radius:8px;
-border:1px solid var(--rosa1);
+border:1px solid var(--verde1);
 }
 
 button{
@@ -82,13 +82,13 @@ cursor:pointer;
 }
 
 .btn{
-background:var(--rosa2);
+background:var(--verde2);
 }
 
 .lista-item{
 display:flex;
 justify-content:space-between;
-background:var(--rosa3);
+background:var(--verde3);
 padding:8px;
 border-radius:8px;
 margin-bottom:5px;
@@ -106,7 +106,7 @@ display:none;
 footer{
 text-align:center;
 padding:15px;
-background:var(--rosa1);
+background:var(--verde1);
 }
 
 </style>
@@ -130,8 +130,17 @@ background:var(--rosa1);
 
 <div class="card">
 <h2>Adicionar Matéria</h2>
+
 <input id="nomeMateria" placeholder="Nome da matéria">
+
+<select id="tipoMateria">
+<option value="Exatas">Exatas</option>
+<option value="Humanas">Humanas</option>
+<option value="Informática">Informática</option>
+</select>
+
 <button class="btn" onclick="addMateria()">Adicionar</button>
+
 </div>
 
 <div id="listaMaterias"></div>
@@ -194,13 +203,10 @@ localStorage.setItem("info",JSON.stringify(info));
 }
 
 function trocarAba(aba){
-
 document.getElementById("materias").classList.add("hidden");
 document.getElementById("info").classList.add("hidden");
 document.getElementById("provas").classList.add("hidden");
-
 document.getElementById(aba).classList.remove("hidden");
-
 }
 
 function renderMaterias(){
@@ -208,7 +214,15 @@ function renderMaterias(){
 const lista=document.getElementById("listaMaterias");
 lista.innerHTML="";
 
-materias.forEach((m,i)=>{
+const tipos=["Exatas","Humanas","Informática"];
+
+tipos.forEach(tipo=>{
+
+lista.innerHTML+=`<h2>${tipo}</h2>`;
+
+materias
+.filter(m=>m.tipo===tipo)
+.forEach((m,i)=>{
 
 const card=document.createElement("div");
 card.className="card";
@@ -219,11 +233,13 @@ card.innerHTML=`
 
 <h4>Conteúdos</h4>
 <div id="conteudos${i}"></div>
-<input placeholder="Novo conteúdo" onkeydown="if(event.key==='Enter')addConteudo(${i},this.value)">
+<input placeholder="Novo conteúdo"
+onkeydown="if(event.key==='Enter')addConteudo(${i},this.value)">
 
 <h4>Tarefas</h4>
 <div id="tarefas${i}"></div>
-<input placeholder="Nova tarefa" onkeydown="if(event.key==='Enter')addTarefa(${i},this.value)">
+<input placeholder="Nova tarefa"
+onkeydown="if(event.key==='Enter')addTarefa(${i},this.value)">
 `;
 
 lista.appendChild(card);
@@ -262,14 +278,18 @@ ${t.texto}
 
 });
 
+});
+
 }
 
 function addMateria(){
 
 const nome=document.getElementById("nomeMateria").value.trim();
+const tipo=document.getElementById("tipoMateria").value;
+
 if(!nome)return alert("Digite o nome");
 
-materias.push({nome,conteudos:[],tarefas:[]});
+materias.push({nome,tipo,conteudos:[],tarefas:[]});
 
 salvar();
 renderMaterias();
@@ -279,56 +299,41 @@ document.getElementById("nomeMateria").value="";
 }
 
 function delMateria(i){
-
 materias.splice(i,1);
 salvar();
 renderMaterias();
-
 }
 
 function addConteudo(i,v){
-
 if(!v)return;
 materias[i].conteudos.push(v);
-
 salvar();
 renderMaterias();
-
 }
 
 function delConteudo(i,ci){
-
 materias[i].conteudos.splice(ci,1);
 salvar();
 renderMaterias();
-
 }
 
 function addTarefa(i,v){
-
 if(!v)return;
-
 materias[i].tarefas.push({texto:v,concluida:false});
-
 salvar();
 renderMaterias();
-
 }
 
 function delTarefa(i,ti){
-
 materias[i].tarefas.splice(ti,1);
 salvar();
 renderMaterias();
-
 }
 
 function toggle(i,ti){
-
 materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida;
 salvar();
 renderMaterias();
-
 }
 
 function salvarInfo(){
@@ -392,12 +397,18 @@ lista.innerHTML+=`
 }
 
 function delProva(i){
-
 provas.splice(i,1);
 salvar();
 renderProvas();
-
 }
+
+document.getElementById("nomeMateria").addEventListener("keydown",e=>{
+if(e.key==="Enter") addMateria();
+});
+
+document.getElementById("conteudoProva").addEventListener("keydown",e=>{
+if(e.key==="Enter") addProva();
+});
 
 renderMaterias();
 renderProvas();
