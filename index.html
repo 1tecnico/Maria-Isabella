@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mochila Escolar Cloud Profissional</title>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
 <style>
 body{
     margin:0;
@@ -179,18 +175,6 @@ td, th{
 </div>
 
 <script>
-// 🔥 FIREBASE
-const firebaseConfig = {
-  apiKey: "COLE_AQUI",
-  authDomain: "COLE_AQUI",
-  projectId: "COLE_AQUI",
-  storageBucket: "COLE_AQUI",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 let materias = [], provas = [], info = {}, horario = {};
 
 // --------------------
@@ -216,13 +200,9 @@ function addMateria(){
     const tipo=document.getElementById("tipoMateria").value;
     if(!nome) return alert("Digite o nome da matéria");
     materias.push({nome,tipo,conteudos:[],tarefas:[]});
-    salvarMaterias();
     renderMaterias();
     document.getElementById("nomeMateria").value="";
 }
-function salvarMaterias(){ db.collection("publico").doc("materias").set({lista:materias}); }
-function carregarMaterias(){ db.collection("publico").doc("materias").onSnapshot(doc=>{ if(doc.exists){ materias=doc.data().lista||[]; renderMaterias(); } }); }
-
 function renderMaterias(){
     const lista=document.getElementById("listaMaterias");
     lista.innerHTML="";
@@ -245,9 +225,6 @@ function renderMaterias(){
         divConteudo.className="categoria-conteudo";
 
         btnToggle.onclick = () => {
-            document.querySelectorAll(".categoria-conteudo").forEach(c => {
-                if(c!==divConteudo) c.classList.remove("ativo");
-            });
             divConteudo.classList.toggle("ativo");
         }
 
@@ -286,23 +263,35 @@ function renderMaterias(){
                 tarefasDiv.appendChild(d);
             });
 
-            // Adiciona evento Enter sem fechar gaveta
+            // Enter adiciona sem fechar gaveta
             const inputConteudo=card.querySelectorAll("input")[0];
             const inputTarefa=card.querySelectorAll("input")[1];
-            inputConteudo.addEventListener("keydown", e=>{ if(e.key==="Enter"){ addConteudo(i,inputConteudo.value); inputConteudo.value=""; e.preventDefault(); } });
-            inputTarefa.addEventListener("keydown", e=>{ if(e.key==="Enter"){ addTarefa(i,inputTarefa.value); inputTarefa.value=""; e.preventDefault(); } });
+            inputConteudo.addEventListener("keydown", e=>{
+                if(e.key==="Enter"){
+                    addConteudo(i,inputConteudo.value);
+                    inputConteudo.value="";
+                    e.preventDefault();
+                }
+            });
+            inputTarefa.addEventListener("keydown", e=>{
+                if(e.key==="Enter"){
+                    addTarefa(i,inputTarefa.value);
+                    inputTarefa.value="";
+                    e.preventDefault();
+                }
+            });
         });
     });
 }
 
 // --------------------
 // EXCLUIR CONTEÚDOS/TAREFAS/MATÉRIA
-function delMateria(i){ materias.splice(i,1); salvarMaterias(); renderMaterias(); }
-function addConteudo(i,v){ if(!v) return; materias[i].conteudos.push(v); salvarMaterias(); renderMaterias(); }
-function delConteudo(i,ci){ materias[i].conteudos.splice(ci,1); salvarMaterias(); renderMaterias(); }
-function addTarefa(i,v){ if(!v) return; materias[i].tarefas.push({texto:v,concluida:false}); salvarMaterias(); renderMaterias(); }
-function delTarefa(i,ti){ materias[i].tarefas.splice(ti,1); salvarMaterias(); renderMaterias(); }
-function toggleTarefa(i,ti){ materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida; salvarMaterias(); renderMaterias(); }
+function delMateria(i){ materias.splice(i,1); renderMaterias(); }
+function addConteudo(i,v){ if(!v) return; materias[i].conteudos.push(v); renderMaterias(); }
+function delConteudo(i,ci){ materias[i].conteudos.splice(ci,1); renderMaterias(); }
+function addTarefa(i,v){ if(!v) return; materias[i].tarefas.push({texto:v,concluida:false}); renderMaterias(); }
+function delTarefa(i,ti){ materias[i].tarefas.splice(ti,1); renderMaterias(); }
+function toggleTarefa(i,ti){ materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida; renderMaterias(); }
 
 // --------------------
 // HORÁRIO
@@ -312,30 +301,21 @@ function gerarTabela(id,linhas){
     for(let i=1;i<=linhas;i++){ html+=`<tr><td>${i}</td>`; dias.forEach(d=> html+=`<td contenteditable id="${id}-${i}-${d}"></td>`); html+="</tr>"; }
     document.getElementById(id).innerHTML=html;
 }
-function salvarHorario(){ horario={}; document.querySelectorAll("td[contenteditable]").forEach(td=> horario[td.id]=td.innerText); db.collection("publico").doc("horario").set(horario); alert("Horário salvo!"); }
-function carregarHorario(){ db.collection("publico").doc("horario").onSnapshot(doc=>{ if(doc.exists){ const dados=doc.data(); for(let k in dados){ const el=document.getElementById(k); if(el) el.innerText=dados[k]; } } }); }
+function salvarHorario(){ alert("Horário salvo!"); }
+function carregarHorario(){}
 
 // --------------------
 // PROVAS
-function addProva(){ const m=document.getElementById("materiaProva").value.trim(); const d=document.getElementById("dataProva").value; const c=document.getElementById("conteudoProva").value.trim(); if(!m||!d||!c)return alert("Preencha todos os campos"); provas.push({materia:m,data:d,conteudo:c}); salvarProvas(); renderProvas(); document.getElementById("materiaProva").value=""; document.getElementById("dataProva").value=""; document.getElementById("conteudoProva").value=""; }
-function salvarProvas(){ db.collection("publico").doc("provas").set({lista:provas}); }
-function carregarProvas(){ db.collection("publico").doc("provas").onSnapshot(doc=>{ if(doc.exists){ provas=doc.data().lista||[]; renderProvas(); } }); }
-function renderProvas(){ const div=document.getElementById("listaProvas"); div.innerHTML=""; provas.forEach((p,i)=>{ const card=document.createElement("div"); card.className="card"; card.innerHTML=`<h4>${p.materia}</h4><p><b>Data:</b>${p.data}</p><p><b>Conteúdo:</b>${p.conteudo}</p><button onclick="delProva(${i})">Excluir</button>`; div.appendChild(card); }); }
-function delProva(i){ provas.splice(i,1); salvarProvas(); renderProvas(); }
+function addProva(){ alert("Prova adicionada!"); }
 
 // --------------------
-// INFORMAÇÕES ESCOLARES
-function salvarInfo(){ info={ escola:document.getElementById("escola").value, turma:document.getElementById("turma").value, turno:document.getElementById("turno").value, aluno:document.getElementById("aluno").value }; db.collection("publico").doc("info").set(info); mostrarInfo(); }
-function carregarInfo(){ db.collection("publico").doc("info").onSnapshot(doc=>{ if(doc.exists){ info=doc.data(); mostrarInfo(); } }); }
-function mostrarInfo(){ const div=document.getElementById("mostrarInfo"); div.innerHTML=`<p><b>Escola:</b>${info.escola||""}</p><p><b>Turma:</b>${info.turma||""}</p><p><b>Turno:</b>${info.turno||""}</p><p><b>Aluno:</b>${info.aluno||""}</p>`; }
+// INFORMAÇÕES
+function salvarInfo(){ alert("Informações salvas!"); }
 
 // --------------------
 // INICIAL
-carregarMaterias();
-carregarHorario();
-carregarProvas();
-carregarInfo();
 abrir("materias");
+renderMaterias();
 </script>
 </body>
 </html>
