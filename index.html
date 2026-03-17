@@ -6,121 +6,123 @@
 <title>Mochila Escolar</title>
 
 <style>
+
 :root{
-  --verde1:#b7e4c7;
-  --verde2:#95d5b2;
-  --verde3:#d8f3dc;
-  --fundo:#f1fff6;
-  --texto:#1b4332;
+--verde1:#b7e4c7;
+--verde2:#95d5b2;
+--verde3:#d8f3dc;
+--fundo:#f1fff6;
+--texto:#1b4332;
 }
 
-*{box-sizing:border-box}
+*{box-sizing:border-box;}
 
 body{
-  margin:0;
-  font-family:Segoe UI, Arial, sans-serif;
-  background:var(--fundo);
-  color:var(--texto);
+margin:0;
+font-family:Segoe UI, Arial;
+background:var(--fundo);
+color:var(--texto);
 }
 
 header{
-  background:var(--verde1);
-  padding:20px;
-  text-align:center;
-  font-size:24px;
-  font-weight:bold;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+background:var(--verde1);
+padding:20px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
 }
 
 nav{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  background:var(--verde3);
-  padding:10px;
+display:flex;
+justify-content:center;
+gap:10px;
+background:var(--verde3);
+padding:10px;
 }
 
 nav button{
-  background:var(--verde2);
-  border:none;
-  padding:10px 15px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
+background:var(--verde2);
+border:none;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
 }
 
 .container{
-  max-width:1000px;
-  margin:auto;
-  padding:20px;
+max-width:1000px;
+margin:auto;
+padding:20px;
 }
 
 .card{
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 6px 14px rgba(0,0,0,0.08);
+background:white;
+padding:15px;
+border-radius:12px;
+box-shadow:0 6px 14px rgba(0,0,0,0.08);
 }
 
 input,select{
-  width:100%;
-  padding:8px;
-  margin:5px 0 10px;
-  border-radius:8px;
-  border:1px solid var(--verde1);
-}
-
-button{
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
+width:100%;
+padding:8px;
+margin:5px 0 10px;
+border-radius:8px;
+border:1px solid var(--verde1);
 }
 
 .btn{
-  background:var(--verde2);
+background:var(--verde2);
 }
 
 .lista-item{
-  display:flex;
-  justify-content:space-between;
-  background:var(--verde3);
-  padding:6px;
-  border-radius:6px;
-  margin-bottom:4px;
+display:flex;
+justify-content:space-between;
+background:var(--verde3);
+padding:6px;
+border-radius:6px;
+margin-bottom:4px;
 }
 
+/* CATEGORIAS */
+
 .categoria{
-  background:var(--verde2);
-  padding:10px;
-  border-radius:10px;
-  margin-top:20px;
-  cursor:pointer;
-  font-weight:bold;
+background:var(--verde2);
+padding:12px;
+border-radius:10px;
+margin-top:20px;
+cursor:pointer;
+font-weight:bold;
 }
 
 .categoria-conteudo{
-  margin-top:10px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:15px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
+
+max-height:0;
+overflow:hidden;
+transition:max-height 0.4s ease;
+}
+
+.categoria-conteudo.ativo{
+max-height:2000px; /* suficiente pra expandir */
 }
 
 .hidden{
-  display:none;
+display:none;
 }
 
 .concluida{
-  text-decoration:line-through;
-  opacity:0.6;
+text-decoration:line-through;
+opacity:0.6;
 }
 
 footer{
-  text-align:center;
-  padding:15px;
-  background:var(--verde1);
-  margin-top:20px;
+text-align:center;
+padding:15px;
+background:var(--verde1);
+margin-top:20px;
 }
+
 </style>
 </head>
 
@@ -139,6 +141,7 @@ footer{
 <div id="materias">
 
 <div class="card">
+
 <h2>Adicionar Matéria</h2>
 
 <input id="nomeMateria" placeholder="Nome da matéria">
@@ -150,6 +153,7 @@ footer{
 </select>
 
 <button class="btn" onclick="addMateria()">Adicionar</button>
+
 </div>
 
 <input id="pesquisaMateria" placeholder="Pesquisar matéria..." oninput="renderMaterias()">
@@ -159,20 +163,20 @@ footer{
 </div>
 
 <div id="info" class="hidden">
-
 <div class="card">
-<h2>Informações Escolares</h2>
 
-<input id="escola" placeholder="Nome da escola">
+<h2>Informações</h2>
+
+<input id="escola" placeholder="Escola">
 <input id="turma" placeholder="Turma">
-<input id="serie" placeholder="Série/Ano">
-<input id="professor" placeholder="Professor responsável">
+<input id="serie" placeholder="Série">
+<input id="professor" placeholder="Professor">
 
 <button class="btn" onclick="salvarInfo()">Salvar</button>
 
 <div id="mostrarInfo"></div>
-</div>
 
+</div>
 </div>
 
 <div id="provas" class="hidden">
@@ -182,7 +186,7 @@ footer{
 
 <input id="materiaProva" placeholder="Matéria">
 <input id="dataProva" type="date">
-<input id="conteudoProva" placeholder="Conteúdo da prova">
+<input id="conteudoProva" placeholder="Conteúdo">
 
 <button class="btn" onclick="addProva()">Adicionar</button>
 </div>
@@ -200,18 +204,19 @@ footer{
 let materias = JSON.parse(localStorage.getItem("materias")) || [];
 let provas = JSON.parse(localStorage.getItem("provas")) || [];
 let info = JSON.parse(localStorage.getItem("info")) || {};
+let categoriasAbertas = JSON.parse(localStorage.getItem("categoriasAbertas")) || {};
 
 function salvar(){
-  localStorage.setItem("materias",JSON.stringify(materias));
-  localStorage.setItem("provas",JSON.stringify(provas));
-  localStorage.setItem("info",JSON.stringify(info));
+localStorage.setItem("materias",JSON.stringify(materias));
+localStorage.setItem("provas",JSON.stringify(provas));
+localStorage.setItem("info",JSON.stringify(info));
 }
 
 function trocarAba(aba){
-  document.getElementById("materias").classList.add("hidden");
-  document.getElementById("info").classList.add("hidden");
-  document.getElementById("provas").classList.add("hidden");
-  document.getElementById(aba).classList.remove("hidden");
+document.getElementById("materias").classList.add("hidden");
+document.getElementById("info").classList.add("hidden");
+document.getElementById("provas").classList.add("hidden");
+document.getElementById(aba).classList.remove("hidden");
 }
 
 function renderMaterias(){
@@ -231,9 +236,11 @@ m.tipo===tipo && m.nome.toLowerCase().includes(pesquisa)
 
 if(grupo.length===0) return;
 
+const aberto = categoriasAbertas[tipo];
+
 lista.innerHTML+=`
 <div class="categoria" onclick="toggleCategoria('${tipo}')">${tipo}</div>
-<div id="cat-${tipo}" class="categoria-conteudo"></div>
+<div id="cat-${tipo}" class="categoria-conteudo ${aberto ? 'ativo' : ''}"></div>
 `;
 
 const container=document.getElementById("cat-"+tipo);
@@ -300,10 +307,19 @@ if(e.key==="Enter") addTarefa(index,e.target.value)
 }
 
 function toggleCategoria(tipo){
-document.getElementById("cat-"+tipo).classList.toggle("hidden");
+
+const div=document.getElementById("cat-"+tipo);
+
+div.classList.toggle("ativo");
+
+categoriasAbertas[tipo] = div.classList.contains("ativo");
+
+localStorage.setItem("categoriasAbertas", JSON.stringify(categoriasAbertas));
+
 }
 
 function addMateria(){
+
 const nome=document.getElementById("nomeMateria").value.trim();
 const tipo=document.getElementById("tipoMateria").value;
 
@@ -313,7 +329,9 @@ materias.push({nome,tipo,conteudos:[],tarefas:[]});
 
 salvar();
 renderMaterias();
+
 document.getElementById("nomeMateria").value="";
+
 }
 
 function delMateria(i){
@@ -355,49 +373,64 @@ renderMaterias();
 }
 
 function salvarInfo(){
+
 info={
 escola:document.getElementById("escola").value,
 turma:document.getElementById("turma").value,
 serie:document.getElementById("serie").value,
 professor:document.getElementById("professor").value
 };
+
 salvar();
 mostrarInfo();
+
 }
 
 function mostrarInfo(){
+
 const div=document.getElementById("mostrarInfo");
+
 div.innerHTML=`
 <p><b>Escola:</b> ${info.escola||""}</p>
 <p><b>Turma:</b> ${info.turma||""}</p>
 <p><b>Série:</b> ${info.serie||""}</p>
 <p><b>Professor:</b> ${info.professor||""}</p>
 `;
+
 }
 
 function addProva(){
+
 const materia=document.getElementById("materiaProva").value;
 const data=document.getElementById("dataProva").value;
 const conteudo=document.getElementById("conteudoProva").value;
 
 provas.push({materia,data,conteudo});
+
 salvar();
 renderProvas();
+
 }
 
 function renderProvas(){
+
 const lista=document.getElementById("listaProvas");
+
 lista.innerHTML="";
 
 provas.forEach((p,i)=>{
+
 lista.innerHTML+=`
 <div class="card">
 <h3>${p.materia}</h3>
 <p><b>Data:</b> ${p.data}</p>
 <p><b>Conteúdo:</b> ${p.conteudo}</p>
 <button onclick="delProva(${i})">Excluir</button>
-</div>`;
+</div>
+`;
+
 });
+
 }
 
 function delProva(i){
