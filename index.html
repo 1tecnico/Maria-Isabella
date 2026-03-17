@@ -83,6 +83,9 @@ button{
     background:#95d5b2;
     margin-top:5px;
 }
+button.excluir{
+    background:#f28b82;
+}
 .lista-item{
     display:flex;
     justify-content:space-between;
@@ -258,7 +261,7 @@ function renderMaterias(){
             const card=document.createElement("div");
             card.className="card";
             card.innerHTML=`
-                <h4>${m.nome}</h4>
+                <h4>${m.nome} <button class="excluir" onclick="delMateria(${i})">Excluir</button></h4>
                 <h5>Conteúdos</h5>
                 <div id="conteudos-${i}"></div>
                 <input placeholder="Novo conteúdo" onkeydown="if(event.key==='Enter') addConteudo(${i},this.value)">
@@ -270,17 +273,28 @@ function renderMaterias(){
 
             // Conteúdos
             const conteudosDiv=card.querySelector("#conteudos-"+i);
-            m.conteudos.forEach((c,ci)=>{ const d=document.createElement("div"); d.className="lista-item"; d.innerHTML=`<span>${c}</span><button onclick="delConteudo(${i},${ci})">X</button>`; conteudosDiv.appendChild(d); });
+            m.conteudos.forEach((c,ci)=>{
+                const d=document.createElement("div");
+                d.className="lista-item";
+                d.innerHTML=`<span>${c}</span><button class="excluir" onclick="delConteudo(${i},${ci})">X</button>`;
+                conteudosDiv.appendChild(d);
+            });
 
             // Tarefas
             const tarefasDiv=card.querySelector("#tarefas-"+i);
-            m.tarefas.forEach((t,ti)=>{ const d=document.createElement("div"); d.className="lista-item"; d.innerHTML=`<div><input type="checkbox" ${t.concluida?"checked":""} onchange="toggleTarefa(${i},${ti})"><span class="${t.concluida?"concluida":""}">${t.texto}</span></div><button onclick="delTarefa(${i},${ti})">X</button>`; tarefasDiv.appendChild(d); });
+            m.tarefas.forEach((t,ti)=>{
+                const d=document.createElement("div");
+                d.className="lista-item";
+                d.innerHTML=`<div><input type="checkbox" ${t.concluida?"checked":""} onchange="toggleTarefa(${i},${ti})"><span class="${t.concluida?"concluida":""}">${t.texto}</span></div><button class="excluir" onclick="delTarefa(${i},${ti})">X</button>`;
+                tarefasDiv.appendChild(d);
+            });
         });
     });
 }
 
 // --------------------
-// Conteúdos / Tarefas
+// EXCLUIR CONTEÚDOS/TAREFAS/MATÉRIA
+function delMateria(i){ materias.splice(i,1); salvarMaterias(); renderMaterias(); }
 function addConteudo(i,v){ if(!v) return; materias[i].conteudos.push(v); salvarMaterias(); renderMaterias(); }
 function delConteudo(i,ci){ materias[i].conteudos.splice(ci,1); salvarMaterias(); renderMaterias(); }
 function addTarefa(i,v){ if(!v) return; materias[i].tarefas.push({texto:v,concluida:false}); salvarMaterias(); renderMaterias(); }
