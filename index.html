@@ -3,329 +3,268 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Escolar Cloud</title>
+<title>Mochila Escolar Cloud Pública</title>
 
-<!-- FIREBASE -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
-
 body{
-margin:0;
-font-family:Segoe UI;
-background:#f1fff6;
+    margin:0;
+    font-family:Segoe UI, Arial;
+    background:#f1fff6;
 }
-
-/* LOGIN */
-
-#login{
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.box{
-background:white;
-padding:30px;
-border-radius:12px;
-width:300px;
-box-shadow:0 5px 15px rgba(0,0,0,0.2);
-}
-
-input{
-width:100%;
-padding:10px;
-margin:5px 0;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
-button{
-width:100%;
-padding:10px;
-margin-top:10px;
-background:#95d5b2;
-border:none;
-border-radius:8px;
-cursor:pointer;
-}
-
-/* APP */
 
 header{
-background:#b7e4c7;
-padding:15px;
-text-align:center;
-font-weight:bold;
+    background:#b7e4c7;
+    padding:15px;
+    text-align:center;
+    font-weight:bold;
 }
 
 nav{
-display:flex;
-gap:10px;
-justify-content:center;
-background:#d8f3dc;
-padding:10px;
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    background:#d8f3dc;
+    padding:10px;
 }
 
 .container{
-padding:20px;
-max-width:1000px;
-margin:auto;
+    padding:20px;
+    max-width:1100px;
+    margin:auto;
 }
 
 .card{
-background:white;
-padding:15px;
-border-radius:12px;
-margin-bottom:10px;
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:10px;
 }
 
 .categoria{
-background:#95d5b2;
-padding:10px;
-border-radius:8px;
-cursor:pointer;
-margin-top:10px;
+    background:#95d5b2;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
 }
 
-.hidden{display:none;}
+.categoria-conteudo{
+    display:none;
+}
+
+.categoria-conteudo.ativo{
+    display:block;
+}
+
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#95d5b2;
+    margin-top:5px;
+}
 
 table{
-width:100%;
-border-collapse:collapse;
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:20px;
 }
 
-td,th{
-border:1px solid #ccc;
-padding:8px;
-text-align:center;
+td, th{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
 }
-
 </style>
-</head>
 
+</head>
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-<div class="box">
-<h2>Login</h2>
-<input id="email" placeholder="Email">
-<input id="senha" type="password" placeholder="Senha">
-
-<button onclick="registrar()">Criar Conta</button>
-<button onclick="login()">Entrar</button>
-</div>
-</div>
-
-<!-- APP -->
-<div id="app" style="display:none">
-
-<header>🎒 Mochila Escolar Cloud</header>
+<header>🎒 Mochila Escolar Cloud Pública</header>
 
 <nav>
-<button onclick="abrir('materias')">Matérias</button>
-<button onclick="abrir('horario')">Horário</button>
-<button onclick="logout()">Sair</button>
+    <button onclick="abrir('materias')">Matérias</button>
+    <button onclick="abrir('horario')">Horário</button>
 </nav>
 
 <div class="container">
 
+<!-- MATÉRIAS -->
 <div id="materias">
+    <div class="card">
+        <input id="nomeMateria" placeholder="Nova matéria">
+        <select id="tipoMateria">
+            <option>Exatas</option>
+            <option>Humanas</option>
+            <option>Informática</option>
+        </select>
+        <button onclick="addMateria()">Adicionar</button>
+        <input id="pesquisa" placeholder="Pesquisar..." oninput="renderMaterias()">
+    </div>
 
-<div class="card">
-<input id="nomeMateria" placeholder="Nova matéria">
-<select id="tipoMateria">
-<option>Exatas</option>
-<option>Humanas</option>
-<option>Informática</option>
-</select>
-<button onclick="addMateria()">Adicionar</button>
+    <div id="listaMaterias"></div>
 </div>
 
-<div id="listaMaterias"></div>
-
-</div>
-
+<!-- HORÁRIO -->
 <div id="horario" class="hidden">
+    <div class="card">
+        <h3>Matutino (5 aulas)</h3>
+        <table id="matutino"></table>
 
-<div class="card">
-<h3>Matutino (5 aulas)</h3>
-<table id="matutino"></table>
+        <h3>Vespertino (4 aulas)</h3>
+        <table id="vespertino"></table>
 
-<h3>Vespertino (4 aulas)</h3>
-<table id="vespertino"></table>
-
-<button onclick="salvarHorario()">Salvar</button>
+        <button onclick="salvarHorario()">Salvar Horário</button>
+    </div>
 </div>
 
-</div>
-
-</div>
 </div>
 
 <script>
-
 // 🔥 CONFIG FIREBASE
 const firebaseConfig = {
-  apiKey: "SUA_CHAVE",
-  authDomain: "SEU_DOMINIO",
-  projectId: "SEU_ID",
+  apiKey: "COLE_AQUI",
+  authDomain: "COLE_AQUI",
+  projectId: "COLE_AQUI",
+  storageBucket: "COLE_AQUI",
+  messagingSenderId: "COLE_AQUI",
+  appId: "COLE_AQUI"
 };
 
 firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Variáveis
 let materias = [];
+let horario = {};
 
-// 🔐 LOGIN
+// 🔁 NAVEGAÇÃO
+function abrir(p){
+    document.getElementById("materias").style.display="none";
+    document.getElementById("horario").style.display="none";
+    document.getElementById(p).style.display="block";
 
-function registrar(){
-auth.createUserWithEmailAndPassword(
-email.value, senha.value
-).then(()=>alert("Conta criada"))
-.catch(e=>alert(e.message));
+    if(p==="horario"){
+        gerarTabela("matutino",5);
+        gerarTabela("vespertino",4);
+        carregarHorario();
+    }
 }
 
-function login(){
-auth.signInWithEmailAndPassword(
-email.value, senha.value
-).then(()=>{
-login.style.display="none";
-app.style.display="block";
-carregar();
-}).catch(e=>alert(e.message));
-}
-
-function logout(){
-auth.signOut();
-location.reload();
-}
-
-// 📦 MATERIAS
-
+// --------------------
+// MATÉRIAS
+// --------------------
 function addMateria(){
-materias.push({
-nome:nomeMateria.value,
-tipo:tipoMateria.value
-});
-salvarMaterias();
-renderMaterias();
+    const nome = document.getElementById("nomeMateria").value.trim();
+    const tipo = document.getElementById("tipoMateria").value;
+
+    if(!nome) return alert("Digite o nome da matéria");
+
+    materias.push({nome,tipo});
+    salvarMaterias();
+    renderMaterias();
+    document.getElementById("nomeMateria").value="";
 }
 
 function salvarMaterias(){
-const user = auth.currentUser;
-
-db.collection("materias")
-.doc(user.uid)
-.set({lista:materias});
+    db.collection("publico").doc("materias").set({lista:materias});
 }
 
-function carregar(){
-const user = auth.currentUser;
-
-db.collection("materias")
-.doc(user.uid)
-.get()
-.then(doc=>{
-if(doc.exists){
-materias = doc.data().lista;
-renderMaterias();
-}
-});
-
-gerarTabela("matutino",5);
-gerarTabela("vespertino",4);
-carregarHorario();
+function carregarMaterias(){
+    db.collection("publico").doc("materias").onSnapshot(doc=>{
+        if(doc.exists){
+            materias = doc.data().lista || [];
+            renderMaterias();
+        }
+    });
 }
 
 function renderMaterias(){
-listaMaterias.innerHTML="";
+    const lista = document.getElementById("listaMaterias");
+    lista.innerHTML="";
 
-["Exatas","Humanas","Informática"].forEach(tipo=>{
+    const pesquisa = document.getElementById("pesquisa").value.toLowerCase();
 
-const grupo=materias.filter(m=>m.tipo===tipo);
+    ["Exatas","Humanas","Informática"].forEach(tipo=>{
+        const grupo = materias.filter(m => m.tipo===tipo && m.nome.toLowerCase().includes(pesquisa));
+        if(grupo.length===0) return;
 
-if(grupo.length===0)return;
+        const cat = document.createElement("div");
+        cat.className="categoria";
+        cat.textContent=tipo;
+        cat.onclick=()=> divConteudo.classList.toggle("ativo");
+        lista.appendChild(cat);
 
-listaMaterias.innerHTML+=`
-<div class="categoria">${tipo}</div>
-`;
-
-grupo.forEach(m=>{
-listaMaterias.innerHTML+=`
-<div class="card">${m.nome}</div>
-`;
-});
-
-});
+        const divConteudo = document.createElement("div");
+        divConteudo.className="categoria-conteudo";
+        grupo.forEach(m=>{
+            const card = document.createElement("div");
+            card.className="card";
+            card.textContent = m.nome;
+            divConteudo.appendChild(card);
+        });
+        lista.appendChild(divConteudo);
+    });
 }
 
-// 📅 HORARIO
-
+// --------------------
+// HORÁRIO
+// --------------------
 function gerarTabela(id,linhas){
-const dias=["Seg","Ter","Qua","Qui","Sex"];
+    const dias=["Seg","Ter","Qua","Qui","Sex"];
+    let html="<tr><th>Aula</th>";
+    dias.forEach(d=>html+=`<th>${d}</th>`);
+    html+="</tr>";
 
-let html="<tr><th></th>";
-dias.forEach(d=>html+=`<th>${d}</th>`);
-html+="</tr>";
+    for(let i=1;i<=linhas;i++){
+        html+=`<tr><td>${i}</td>`;
+        dias.forEach(d=>{
+            html+=`<td contenteditable id="${id}-${i}-${d}"></td>`;
+        });
+        html+="</tr>";
+    }
 
-for(let i=1;i<=linhas;i++){
-html+=`<tr><td>${i}</td>`;
-dias.forEach(d=>{
-html+=`<td contenteditable="true" id="${id}-${i}-${d}"></td>`;
-});
-html+="</tr>";
-}
-
-document.getElementById(id).innerHTML=html;
+    document.getElementById(id).innerHTML=html;
 }
 
 function salvarHorario(){
-const user=auth.currentUser;
+    horario={};
+    document.querySelectorAll("td[contenteditable]").forEach(td=>{
+        horario[td.id]=td.innerText;
+    });
 
-let dados={};
-
-document.querySelectorAll("td[contenteditable]").forEach(td=>{
-dados[td.id]=td.innerText;
-});
-
-db.collection("horario")
-.doc(user.uid)
-.set(dados);
-
-alert("Salvo!");
+    db.collection("publico").doc("horario").set(horario);
+    alert("Horário salvo!");
 }
 
 function carregarHorario(){
-const user=auth.currentUser;
-
-db.collection("horario")
-.doc(user.uid)
-.get()
-.then(doc=>{
-if(doc.exists){
-const dados=doc.data();
-for(let k in dados){
-const el=document.getElementById(k);
-if(el) el.innerText=dados[k];
-}
-}
-});
+    db.collection("publico").doc("horario").onSnapshot(doc=>{
+        if(doc.exists){
+            const dados = doc.data();
+            for(let k in dados){
+                const el = document.getElementById(k);
+                if(el) el.innerText = dados[k];
+            }
+        }
+    });
 }
 
-// 🔁 NAVEGAÇÃO
-
-function abrir(p){
-materias.style.display="none";
-horario.style.display="none";
-document.getElementById(p).style.display="block";
-}
+// Inicial
+carregarMaterias();
+abrir('materias');
 
 </script>
 
