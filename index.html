@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Escolar Cloud Pública</title>
+<title>Mochila Escolar Cloud</title>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -13,7 +13,7 @@
 body{
     margin:0;
     font-family:Segoe UI, Arial;
-    background:#f1fff6;
+    background:#e6f4ea;
     color:#2a3a2b;
 }
 header{
@@ -31,7 +31,7 @@ nav{
 }
 .container{
     padding:20px;
-    max-width:1100px;
+    max-width:1200px;
     margin:auto;
 }
 .card{
@@ -54,10 +54,13 @@ nav{
 }
 .categoria-conteudo{
     display:none;
-    padding-left:10px;
+    padding:10px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
 }
 .categoria-conteudo.ativo{
-    display:block;
+    display: grid;
 }
 input, select, textarea{
     width:100%;
@@ -101,11 +104,13 @@ td, th{
 
 <body>
 
-<header>🎒 Mochila Escolar Cloud Pública</header>
+<header>🎒 Mochila Escolar Cloud</header>
 
 <nav>
     <button onclick="abrir('materias')">Matérias</button>
     <button onclick="abrir('horario')">Horário</button>
+    <button onclick="abrir('provas')">Provas</button>
+    <button onclick="abrir('info')">Informações</button>
 </nav>
 
 <div class="container">
@@ -138,6 +143,29 @@ td, th{
     </div>
 </div>
 
+<!-- PROVAS -->
+<div id="provas" class="hidden">
+    <div class="card">
+        <input id="materiaProva" placeholder="Matéria" onkeydown="if(event.key==='Enter') addProva()">
+        <input id="dataProva" type="date">
+        <input id="conteudoProva" placeholder="Conteúdo da prova" onkeydown="if(event.key==='Enter') addProva()">
+        <button onclick="addProva()">Adicionar Prova</button>
+    </div>
+    <div id="listaProvas"></div>
+</div>
+
+<!-- INFORMAÇÕES ESCOLARES -->
+<div id="info" class="hidden">
+    <div class="card">
+        <input id="escola" placeholder="Escola">
+        <input id="turma" placeholder="Turma">
+        <input id="turno" placeholder="Turno">
+        <input id="aluno" placeholder="Nome do aluno">
+        <button onclick="salvarInfo()">Salvar Informações</button>
+        <div id="mostrarInfo"></div>
+    </div>
+</div>
+
 </div>
 
 <script>
@@ -154,7 +182,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Variáveis
 let materias = [];
+let provas = [];
+let info = {};
 let horario = {};
 
 // --------------------
@@ -163,6 +194,8 @@ let horario = {};
 function abrir(p){
     document.getElementById("materias").style.display="none";
     document.getElementById("horario").style.display="none";
+    document.getElementById("provas").style.display="none";
+    document.getElementById("info").style.display="none";
     document.getElementById(p).style.display="block";
 
     if(p==="horario"){
@@ -179,16 +212,13 @@ function addMateria(){
     const nome = document.getElementById("nomeMateria").value.trim();
     const tipo = document.getElementById("tipoMateria").value;
     if(!nome) return alert("Digite o nome da matéria");
-    materias.push({nome, tipo, conteudos:[], tarefas:[]});
+    materias.push({nome,tipo,conteudos:[],tarefas:[]});
     salvarMaterias();
     renderMaterias();
     document.getElementById("nomeMateria").value="";
 }
 
-function salvarMaterias(){
-    db.collection("publico").doc("materias").set({lista:materias});
-}
-
+function salvarMaterias(){ db.collection("publico").doc("materias").set({lista:materias}); }
 function carregarMaterias(){
     db.collection("publico").doc("materias").onSnapshot(doc=>{
         if(doc.exists){
@@ -218,20 +248,18 @@ function renderMaterias(){
         grupo.forEach((m,i)=>{
             const card = document.createElement("div");
             card.className="card";
-
             card.innerHTML=`
-            <h4>${m.nome}</h4>
-            <h5>Conteúdos</h5>
-            <div id="conteudos-${i}"></div>
-            <input placeholder="Novo conteúdo" onkeydown="if(event.key==='Enter') addConteudo(${i},this.value)">
-            <h5>Tarefas</h5>
-            <div id="tarefas-${i}"></div>
-            <input placeholder="Nova tarefa" onkeydown="if(event.key==='Enter') addTarefa(${i},this.value)">
+                <h4>${m.nome}</h4>
+                <h5>Conteúdos</h5>
+                <div id="conteudos-${i}"></div>
+                <input placeholder="Novo conteúdo" onkeydown="if(event.key==='Enter') addConteudo(${i},this.value)">
+                <h5>Tarefas</h5>
+                <div id="tarefas-${i}"></div>
+                <input placeholder="Nova tarefa" onkeydown="if(event.key==='Enter') addTarefa(${i},this.value)">
             `;
-
             divConteudo.appendChild(card);
 
-            // Render Conteúdos
+            // Conteúdos
             const conteudosDiv = card.querySelector("#conteudos-"+i);
             m.conteudos.forEach((c,ci)=>{
                 const div = document.createElement("div");
@@ -240,21 +268,20 @@ function renderMaterias(){
                 conteudosDiv.appendChild(div);
             });
 
-            // Render Tarefas
+            // Tarefas
             const tarefasDiv = card.querySelector("#tarefas-"+i);
             m.tarefas.forEach((t,ti)=>{
                 const div = document.createElement("div");
                 div.className="lista-item";
                 div.innerHTML=`
-                <div>
-                <input type="checkbox" ${t.concluida?"checked":""} onchange="toggleTarefa(${i},${ti})">
-                <span class="${t.concluida?"concluida":""}">${t.texto}</span>
-                </div>
-                <button onclick="delTarefa(${i},${ti})">X</button>
+                    <div>
+                    <input type="checkbox" ${t.concluida?"checked":""} onchange="toggleTarefa(${i},${ti})">
+                    <span class="${t.concluida?"concluida":""}">${t.texto}</span>
+                    </div>
+                    <button onclick="delTarefa(${i},${ti})">X</button>
                 `;
                 tarefasDiv.appendChild(div);
             });
-
         });
 
         lista.appendChild(divConteudo);
@@ -262,40 +289,12 @@ function renderMaterias(){
     });
 }
 
-// --------------------
-// CONTEÚDOS E TAREFAS
-// --------------------
-function addConteudo(i,v){
-    if(!v) return;
-    materias[i].conteudos.push(v);
-    salvarMaterias();
-    renderMaterias();
-}
-
-function delConteudo(i,ci){
-    materias[i].conteudos.splice(ci,1);
-    salvarMaterias();
-    renderMaterias();
-}
-
-function addTarefa(i,v){
-    if(!v) return;
-    materias[i].tarefas.push({texto:v,concluida:false});
-    salvarMaterias();
-    renderMaterias();
-}
-
-function delTarefa(i,ti){
-    materias[i].tarefas.splice(ti,1);
-    salvarMaterias();
-    renderMaterias();
-}
-
-function toggleTarefa(i,ti){
-    materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida;
-    salvarMaterias();
-    renderMaterias();
-}
+// Conteúdos/Tarefas
+function addConteudo(i,v){ if(!v) return; materias[i].conteudos.push(v); salvarMaterias(); renderMaterias(); }
+function delConteudo(i,ci){ materias[i].conteudos.splice(ci,1); salvarMaterias(); renderMaterias(); }
+function addTarefa(i,v){ if(!v) return; materias[i].tarefas.push({texto:v,concluida:false}); salvarMaterias(); renderMaterias(); }
+function delTarefa(i,ti){ materias[i].tarefas.splice(ti,1); salvarMaterias(); renderMaterias(); }
+function toggleTarefa(i,ti){ materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida; salvarMaterias(); renderMaterias(); }
 
 // --------------------
 // HORÁRIO
@@ -307,42 +306,74 @@ function gerarTabela(id,linhas){
     html+="</tr>";
     for(let i=1;i<=linhas;i++){
         html+=`<tr><td>${i}</td>`;
-        dias.forEach(d=>{
-            html+=`<td contenteditable id="${id}-${i}-${d}"></td>`;
-        });
+        dias.forEach(d=> html+=`<td contenteditable id="${id}-${i}-${d}"></td>`);
         html+="</tr>";
     }
     document.getElementById(id).innerHTML=html;
 }
+function salvarHorario(){ horario={}; document.querySelectorAll("td[contenteditable]").forEach(td=> horario[td.id]=td.innerText); db.collection("publico").doc("horario").set(horario); alert("Horário salvo!"); }
+function carregarHorario(){ db.collection("publico").doc("horario").onSnapshot(doc=>{ if(doc.exists){ const dados = doc.data(); for(let k in dados){ const el = document.getElementById(k); if(el) el.innerText = dados[k]; } } }); }
 
-function salvarHorario(){
-    horario={};
-    document.querySelectorAll("td[contenteditable]").forEach(td=>{
-        horario[td.id]=td.innerText;
-    });
-    db.collection("publico").doc("horario").set(horario);
-    alert("Horário salvo!");
+// --------------------
+// PROVAS
+// --------------------
+function addProva(){
+    const m = document.getElementById("materiaProva").value.trim();
+    const d = document.getElementById("dataProva").value;
+    const c = document.getElementById("conteudoProva").value.trim();
+    if(!m||!d||!c) return alert("Preencha todos os campos");
+    provas.push({materia:m,data:d,conteudo:c});
+    salvarProvas();
+    renderProvas();
+    document.getElementById("materiaProva").value="";
+    document.getElementById("dataProva").value="";
+    document.getElementById("conteudoProva").value="";
 }
-
-function carregarHorario(){
-    db.collection("publico").doc("horario").onSnapshot(doc=>{
-        if(doc.exists){
-            const dados = doc.data();
-            for(let k in dados){
-                const el = document.getElementById(k);
-                if(el) el.innerText = dados[k];
-            }
-        }
+function salvarProvas(){ db.collection("publico").doc("provas").set({lista:provas}); }
+function carregarProvas(){ db.collection("publico").doc("provas").onSnapshot(doc=>{ if(doc.exists){ provas=doc.data().lista||[]; renderProvas(); } }); }
+function renderProvas(){
+    const div=document.getElementById("listaProvas"); div.innerHTML="";
+    provas.forEach((p,i)=>{
+        const card = document.createElement("div"); card.className="card";
+        card.innerHTML=`<h4>${p.materia}</h4><p><b>Data:</b>${p.data}</p><p><b>Conteúdo:</b>${p.conteudo}</p><button onclick="delProva(${i})">Excluir</button>`;
+        div.appendChild(card);
     });
+}
+function delProva(i){ provas.splice(i,1); salvarProvas(); renderProvas(); }
+
+// --------------------
+// INFORMAÇÕES ESCOLARES
+// --------------------
+function salvarInfo(){
+    info={
+        escola:document.getElementById("escola").value,
+        turma:document.getElementById("turma").value,
+        turno:document.getElementById("turno").value,
+        aluno:document.getElementById("aluno").value
+    };
+    db.collection("publico").doc("info").set(info);
+    mostrarInfo();
+}
+function carregarInfo(){ db.collection("publico").doc("info").onSnapshot(doc=>{ if(doc.exists){ info=doc.data(); mostrarInfo(); } }); }
+function mostrarInfo(){
+    const div = document.getElementById("mostrarInfo");
+    div.innerHTML=`
+        <p><b>Escola:</b> ${info.escola||""}</p>
+        <p><b>Turma:</b> ${info.turma||""}</p>
+        <p><b>Turno:</b> ${info.turno||""}</p>
+        <p><b>Aluno:</b> ${info.aluno||""}</p>
+    `;
 }
 
 // --------------------
 // INICIAL
 // --------------------
 carregarMaterias();
-abrir('materias');
+carregarHorario();
+carregarProvas();
+carregarInfo();
+abrir("materias");
 
 </script>
-
 </body>
 </html>
