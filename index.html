@@ -89,6 +89,7 @@ button{
     text-decoration:line-through;
     opacity:0.6;
 }
+.hidden{ display:none; }
 table{
     width:100%;
     border-collapse:collapse;
@@ -116,7 +117,7 @@ td, th{
 <div class="container">
 
 <!-- MATÉRIAS -->
-<div id="materias">
+<div id="materias" class="hidden">
     <div class="card">
         <input id="nomeMateria" placeholder="Nova matéria" onkeydown="if(event.key==='Enter') addMateria()">
         <select id="tipoMateria">
@@ -169,7 +170,7 @@ td, th{
 </div>
 
 <script>
-// 🔥 CONFIG FIREBASE
+// 🔥 FIREBASE
 const firebaseConfig = {
   apiKey: "COLE_AQUI",
   authDomain: "COLE_AQUI",
@@ -181,20 +182,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let materias = [];
-let provas = [];
-let info = {};
-let horario = {};
+let materias = [], provas = [], info = {}, horario = {};
 
 // --------------------
-// NAVEGAÇÃO
-// --------------------
+// ABAS
 function abrir(p){
-    document.getElementById("materias").style.display="none";
-    document.getElementById("horario").style.display="none";
-    document.getElementById("provas").style.display="none";
-    document.getElementById("info").style.display="none";
-    document.getElementById(p).style.display="block";
+    document.getElementById("materias").classList.add("hidden");
+    document.getElementById("horario").classList.add("hidden");
+    document.getElementById("provas").classList.add("hidden");
+    document.getElementById("info").classList.add("hidden");
+    document.getElementById(p).classList.remove("hidden");
 
     if(p==="horario"){
         gerarTabela("matutino",5);
@@ -205,57 +202,48 @@ function abrir(p){
 
 // --------------------
 // MATÉRIAS
-// --------------------
 function addMateria(){
-    const nome = document.getElementById("nomeMateria").value.trim();
-    const tipo = document.getElementById("tipoMateria").value;
+    const nome=document.getElementById("nomeMateria").value.trim();
+    const tipo=document.getElementById("tipoMateria").value;
     if(!nome) return alert("Digite o nome da matéria");
     materias.push({nome,tipo,conteudos:[],tarefas:[]});
     salvarMaterias();
     renderMaterias();
     document.getElementById("nomeMateria").value="";
 }
-
 function salvarMaterias(){ db.collection("publico").doc("materias").set({lista:materias}); }
-function carregarMaterias(){
-    db.collection("publico").doc("materias").onSnapshot(doc=>{
-        if(doc.exists){
-            materias = doc.data().lista || [];
-            renderMaterias();
-        }
-    });
-}
+function carregarMaterias(){ db.collection("publico").doc("materias").onSnapshot(doc=>{ if(doc.exists){ materias=doc.data().lista||[]; renderMaterias(); } }); }
 
 function renderMaterias(){
-    const lista = document.getElementById("listaMaterias");
+    const lista=document.getElementById("listaMaterias");
     lista.innerHTML="";
-    const pesquisa = document.getElementById("pesquisa").value.toLowerCase();
+    const pesquisa=document.getElementById("pesquisa").value.toLowerCase();
 
     ["Exatas","Humanas","Informática"].forEach(tipo=>{
-        const grupo = materias.filter(m => m.tipo===tipo && m.nome.toLowerCase().includes(pesquisa));
+        const grupo = materias.filter(m=>m.tipo===tipo && m.nome.toLowerCase().includes(pesquisa));
         if(grupo.length===0) return;
 
-        const cat = document.createElement("div");
+        const cat=document.createElement("div");
         cat.className="categoria";
 
-        // Botão abrir/fechar
-        const btnToggle = document.createElement("button");
-        btnToggle.textContent = "Abrir/Fechar";
+        const spanTipo=document.createElement("span");
+        spanTipo.textContent=tipo;
+        const btnToggle=document.createElement("button");
+        btnToggle.textContent="Abrir/Fechar";
         btnToggle.style.background="#74c69d";
-        btnToggle.onclick = ()=> divConteudo.classList.toggle("ativo");
 
-        const spanTipo = document.createElement("span");
-        spanTipo.textContent = tipo;
+        const divConteudo=document.createElement("div");
+        divConteudo.className="categoria-conteudo";
+
+        btnToggle.onclick=()=> divConteudo.classList.toggle("ativo");
 
         cat.appendChild(spanTipo);
         cat.appendChild(btnToggle);
         lista.appendChild(cat);
-
-        const divConteudo = document.createElement("div");
-        divConteudo.className="categoria-conteudo";
+        lista.appendChild(divConteudo);
 
         grupo.forEach((m,i)=>{
-            const card = document.createElement("div");
+            const card=document.createElement("div");
             card.className="card";
             card.innerHTML=`
                 <h4>${m.nome}</h4>
@@ -269,37 +257,18 @@ function renderMaterias(){
             divConteudo.appendChild(card);
 
             // Conteúdos
-            const conteudosDiv = card.querySelector("#conteudos-"+i);
-            m.conteudos.forEach((c,ci)=>{
-                const div = document.createElement("div");
-                div.className="lista-item";
-                div.innerHTML=`<span>${c}</span><button onclick="delConteudo(${i},${ci})">X</button>`;
-                conteudosDiv.appendChild(div);
-            });
+            const conteudosDiv=card.querySelector("#conteudos-"+i);
+            m.conteudos.forEach((c,ci)=>{ const d=document.createElement("div"); d.className="lista-item"; d.innerHTML=`<span>${c}</span><button onclick="delConteudo(${i},${ci})">X</button>`; conteudosDiv.appendChild(d); });
 
             // Tarefas
-            const tarefasDiv = card.querySelector("#tarefas-"+i);
-            m.tarefas.forEach((t,ti)=>{
-                const div = document.createElement("div");
-                div.className="lista-item";
-                div.innerHTML=`
-                    <div>
-                    <input type="checkbox" ${t.concluida?"checked":""} onchange="toggleTarefa(${i},${ti})">
-                    <span class="${t.concluida?"concluida":""}">${t.texto}</span>
-                    </div>
-                    <button onclick="delTarefa(${i},${ti})">X</button>
-                `;
-                tarefasDiv.appendChild(div);
-            });
+            const tarefasDiv=card.querySelector("#tarefas-"+i);
+            m.tarefas.forEach((t,ti)=>{ const d=document.createElement("div"); d.className="lista-item"; d.innerHTML=`<div><input type="checkbox" ${t.concluida?"checked":""} onchange="toggleTarefa(${i},${ti})"><span class="${t.concluida?"concluida":""}">${t.texto}</span></div><button onclick="delTarefa(${i},${ti})">X</button>`; tarefasDiv.appendChild(d); });
         });
-
-        lista.appendChild(divConteudo);
     });
 }
 
 // --------------------
-// CONTEÚDOS/TAREFAS
-// --------------------
+// Conteúdos / Tarefas
 function addConteudo(i,v){ if(!v) return; materias[i].conteudos.push(v); salvarMaterias(); renderMaterias(); }
 function delConteudo(i,ci){ materias[i].conteudos.splice(ci,1); salvarMaterias(); renderMaterias(); }
 function addTarefa(i,v){ if(!v) return; materias[i].tarefas.push({texto:v,concluida:false}); salvarMaterias(); renderMaterias(); }
@@ -308,26 +277,17 @@ function toggleTarefa(i,ti){ materias[i].tarefas[ti].concluida=!materias[i].tare
 
 // --------------------
 // HORÁRIO
-// --------------------
 function gerarTabela(id,linhas){
     const dias=["Seg","Ter","Qua","Qui","Sex"];
-    let html="<tr><th>Aula</th>";
-    dias.forEach(d=>html+=`<th>${d}</th>`);
-    html+="</tr>";
-    for(let i=1;i<=linhas;i++){
-        html+=`<tr><td>${i}</td>`;
-        dias.forEach(d=> html+=`<td contenteditable id="${id}-${i}-${d}"></td>`);
-        html+="</tr>";
-    }
+    let html="<tr><th>Aula</th>"; dias.forEach(d=>html+=`<th>${d}</th>`); html+="</tr>";
+    for(let i=1;i<=linhas;i++){ html+=`<tr><td>${i}</td>`; dias.forEach(d=> html+=`<td contenteditable id="${id}-${i}-${d}"></td>`); html+="</tr>"; }
     document.getElementById(id).innerHTML=html;
 }
 function salvarHorario(){ horario={}; document.querySelectorAll("td[contenteditable]").forEach(td=> horario[td.id]=td.innerText); db.collection("publico").doc("horario").set(horario); alert("Horário salvo!"); }
-function carregarHorario(){ db.collection("publico").doc("horario").onSnapshot(doc=>{ if(doc.exists){ const dados = doc.data(); for(let k in dados){ const el = document.getElementById(k); if(el) el.innerText = dados[k]; } } }); }
+function carregarHorario(){ db.collection("publico").doc("horario").onSnapshot(doc=>{ if(doc.exists){ const dados=doc.data(); for(let k in dados){ const el=document.getElementById(k); if(el) el.innerText=dados[k]; } } }); }
 
 // --------------------
 // PROVAS
-// --------------------
-let provas = [];
 function addProva(){ const m=document.getElementById("materiaProva").value.trim(); const d=document.getElementById("dataProva").value; const c=document.getElementById("conteudoProva").value.trim(); if(!m||!d||!c)return alert("Preencha todos os campos"); provas.push({materia:m,data:d,conteudo:c}); salvarProvas(); renderProvas(); document.getElementById("materiaProva").value=""; document.getElementById("dataProva").value=""; document.getElementById("conteudoProva").value=""; }
 function salvarProvas(){ db.collection("publico").doc("provas").set({lista:provas}); }
 function carregarProvas(){ db.collection("publico").doc("provas").onSnapshot(doc=>{ if(doc.exists){ provas=doc.data().lista||[]; renderProvas(); } }); }
@@ -336,15 +296,12 @@ function delProva(i){ provas.splice(i,1); salvarProvas(); renderProvas(); }
 
 // --------------------
 // INFORMAÇÕES ESCOLARES
-// --------------------
-let info={};
 function salvarInfo(){ info={ escola:document.getElementById("escola").value, turma:document.getElementById("turma").value, turno:document.getElementById("turno").value, aluno:document.getElementById("aluno").value }; db.collection("publico").doc("info").set(info); mostrarInfo(); }
 function carregarInfo(){ db.collection("publico").doc("info").onSnapshot(doc=>{ if(doc.exists){ info=doc.data(); mostrarInfo(); } }); }
 function mostrarInfo(){ const div=document.getElementById("mostrarInfo"); div.innerHTML=`<p><b>Escola:</b>${info.escola||""}</p><p><b>Turma:</b>${info.turma||""}</p><p><b>Turno:</b>${info.turno||""}</p><p><b>Aluno:</b>${info.aluno||""}</p>`; }
 
 // --------------------
 // INICIAL
-// --------------------
 carregarMaterias();
 carregarHorario();
 carregarProvas();
