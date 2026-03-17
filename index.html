@@ -3,124 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Escolar</title>
+<title>Mochila Escolar Cloud</title>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
 
-:root{
---verde1:#b7e4c7;
---verde2:#95d5b2;
---verde3:#d8f3dc;
---fundo:#f1fff6;
---texto:#1b4332;
-}
-
-*{box-sizing:border-box;}
-
 body{
 margin:0;
-font-family:Segoe UI, Arial;
-background:var(--fundo);
-color:var(--texto);
+font-family:Segoe UI;
+background:#f1fff6;
 }
 
+/* LOGIN */
+
+#login{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.box{
+background:white;
+padding:30px;
+border-radius:12px;
+width:300px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+input{
+width:100%;
+padding:10px;
+margin:5px 0;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#95d5b2;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* APP */
+
 header{
-background:var(--verde1);
-padding:20px;
+background:#b7e4c7;
+padding:15px;
 text-align:center;
-font-size:24px;
 font-weight:bold;
 }
 
 nav{
 display:flex;
-justify-content:center;
 gap:10px;
-background:var(--verde3);
+justify-content:center;
+background:#d8f3dc;
 padding:10px;
-}
-
-nav button{
-background:var(--verde2);
-border:none;
-padding:10px;
-border-radius:8px;
-cursor:pointer;
 }
 
 .container{
+padding:20px;
 max-width:1000px;
 margin:auto;
-padding:20px;
 }
 
 .card{
 background:white;
 padding:15px;
 border-radius:12px;
-box-shadow:0 6px 14px rgba(0,0,0,0.08);
+margin-bottom:10px;
 }
-
-input,select{
-width:100%;
-padding:8px;
-margin:5px 0 10px;
-border-radius:8px;
-border:1px solid var(--verde1);
-}
-
-.btn{
-background:var(--verde2);
-}
-
-.lista-item{
-display:flex;
-justify-content:space-between;
-background:var(--verde3);
-padding:6px;
-border-radius:6px;
-margin-bottom:4px;
-}
-
-/* CATEGORIAS */
 
 .categoria{
-background:var(--verde2);
-padding:12px;
-border-radius:10px;
-margin-top:20px;
+background:#95d5b2;
+padding:10px;
+border-radius:8px;
 cursor:pointer;
-font-weight:bold;
+margin-top:10px;
 }
 
-.categoria-conteudo{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:15px;
+.hidden{display:none;}
 
-max-height:0;
-overflow:hidden;
-transition:max-height 0.4s ease;
+table{
+width:100%;
+border-collapse:collapse;
 }
 
-.categoria-conteudo.ativo{
-max-height:2000px; /* suficiente pra expandir */
-}
-
-.hidden{
-display:none;
-}
-
-.concluida{
-text-decoration:line-through;
-opacity:0.6;
-}
-
-footer{
+td,th{
+border:1px solid #ccc;
+padding:8px;
 text-align:center;
-padding:15px;
-background:var(--verde1);
-margin-top:20px;
 }
 
 </style>
@@ -128,12 +109,27 @@ margin-top:20px;
 
 <body>
 
-<header>🎒 Minha Mochila Escolar</header>
+<!-- LOGIN -->
+<div id="login">
+<div class="box">
+<h2>Login</h2>
+<input id="email" placeholder="Email">
+<input id="senha" type="password" placeholder="Senha">
+
+<button onclick="registrar()">Criar Conta</button>
+<button onclick="login()">Entrar</button>
+</div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<header>🎒 Mochila Escolar Cloud</header>
 
 <nav>
-<button onclick="trocarAba('materias')">Matérias</button>
-<button onclick="trocarAba('info')">Informações</button>
-<button onclick="trocarAba('provas')">Provas</button>
+<button onclick="abrir('materias')">Matérias</button>
+<button onclick="abrir('horario')">Horário</button>
+<button onclick="logout()">Sair</button>
 </nav>
 
 <div class="container">
@@ -141,315 +137,195 @@ margin-top:20px;
 <div id="materias">
 
 <div class="card">
-
-<h2>Adicionar Matéria</h2>
-
-<input id="nomeMateria" placeholder="Nome da matéria">
-
+<input id="nomeMateria" placeholder="Nova matéria">
 <select id="tipoMateria">
-<option value="Exatas">Exatas</option>
-<option value="Humanas">Humanas</option>
-<option value="Informática">Informática</option>
+<option>Exatas</option>
+<option>Humanas</option>
+<option>Informática</option>
 </select>
-
-<button class="btn" onclick="addMateria()">Adicionar</button>
-
+<button onclick="addMateria()">Adicionar</button>
 </div>
-
-<input id="pesquisaMateria" placeholder="Pesquisar matéria..." oninput="renderMaterias()">
 
 <div id="listaMaterias"></div>
 
 </div>
 
-<div id="info" class="hidden">
-<div class="card">
-
-<h2>Informações</h2>
-
-<input id="escola" placeholder="Escola">
-<input id="turma" placeholder="Turma">
-<input id="serie" placeholder="Série">
-<input id="professor" placeholder="Professor">
-
-<button class="btn" onclick="salvarInfo()">Salvar</button>
-
-<div id="mostrarInfo"></div>
-
-</div>
-</div>
-
-<div id="provas" class="hidden">
+<div id="horario" class="hidden">
 
 <div class="card">
-<h2>Adicionar Prova</h2>
+<h3>Matutino (5 aulas)</h3>
+<table id="matutino"></table>
 
-<input id="materiaProva" placeholder="Matéria">
-<input id="dataProva" type="date">
-<input id="conteudoProva" placeholder="Conteúdo">
+<h3>Vespertino (4 aulas)</h3>
+<table id="vespertino"></table>
 
-<button class="btn" onclick="addProva()">Adicionar</button>
-</div>
-
-<div id="listaProvas"></div>
-
+<button onclick="salvarHorario()">Salvar</button>
 </div>
 
 </div>
 
-<footer>© 2026 Mochila Escolar</footer>
+</div>
+</div>
 
 <script>
 
-let materias = JSON.parse(localStorage.getItem("materias")) || [];
-let provas = JSON.parse(localStorage.getItem("provas")) || [];
-let info = JSON.parse(localStorage.getItem("info")) || {};
-let categoriasAbertas = JSON.parse(localStorage.getItem("categoriasAbertas")) || {};
+// 🔥 CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "SUA_CHAVE",
+  authDomain: "SEU_DOMINIO",
+  projectId: "SEU_ID",
+};
 
-function salvar(){
-localStorage.setItem("materias",JSON.stringify(materias));
-localStorage.setItem("provas",JSON.stringify(provas));
-localStorage.setItem("info",JSON.stringify(info));
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let materias = [];
+
+// 🔐 LOGIN
+
+function registrar(){
+auth.createUserWithEmailAndPassword(
+email.value, senha.value
+).then(()=>alert("Conta criada"))
+.catch(e=>alert(e.message));
 }
 
-function trocarAba(aba){
-document.getElementById("materias").classList.add("hidden");
-document.getElementById("info").classList.add("hidden");
-document.getElementById("provas").classList.add("hidden");
-document.getElementById(aba).classList.remove("hidden");
+function login(){
+auth.signInWithEmailAndPassword(
+email.value, senha.value
+).then(()=>{
+login.style.display="none";
+app.style.display="block";
+carregar();
+}).catch(e=>alert(e.message));
+}
+
+function logout(){
+auth.signOut();
+location.reload();
+}
+
+// 📦 MATERIAS
+
+function addMateria(){
+materias.push({
+nome:nomeMateria.value,
+tipo:tipoMateria.value
+});
+salvarMaterias();
+renderMaterias();
+}
+
+function salvarMaterias(){
+const user = auth.currentUser;
+
+db.collection("materias")
+.doc(user.uid)
+.set({lista:materias});
+}
+
+function carregar(){
+const user = auth.currentUser;
+
+db.collection("materias")
+.doc(user.uid)
+.get()
+.then(doc=>{
+if(doc.exists){
+materias = doc.data().lista;
+renderMaterias();
+}
+});
+
+gerarTabela("matutino",5);
+gerarTabela("vespertino",4);
+carregarHorario();
 }
 
 function renderMaterias(){
+listaMaterias.innerHTML="";
 
-const lista=document.getElementById("listaMaterias");
-lista.innerHTML="";
+["Exatas","Humanas","Informática"].forEach(tipo=>{
 
-const pesquisa=(document.getElementById("pesquisaMateria")?.value || "").toLowerCase();
+const grupo=materias.filter(m=>m.tipo===tipo);
 
-const tipos=["Exatas","Humanas","Informática"];
+if(grupo.length===0)return;
 
-tipos.forEach(tipo=>{
-
-const grupo=materias.filter(m =>
-m.tipo===tipo && m.nome.toLowerCase().includes(pesquisa)
-);
-
-if(grupo.length===0) return;
-
-const aberto = categoriasAbertas[tipo];
-
-lista.innerHTML+=`
-<div class="categoria" onclick="toggleCategoria('${tipo}')">${tipo}</div>
-<div id="cat-${tipo}" class="categoria-conteudo ${aberto ? 'ativo' : ''}"></div>
+listaMaterias.innerHTML+=`
+<div class="categoria">${tipo}</div>
 `;
-
-const container=document.getElementById("cat-"+tipo);
 
 grupo.forEach(m=>{
-
-const index=materias.indexOf(m);
-
-const card=document.createElement("div");
-card.className="card";
-
-card.innerHTML=`
-<h3>${m.nome}</h3>
-<button onclick="delMateria(${index})">Excluir</button>
-
-<h4>Conteúdos</h4>
-<div id="conteudos${index}"></div>
-<input id="conteudoInput${index}" placeholder="Novo conteúdo">
-
-<h4>Tarefas</h4>
-<div id="tarefas${index}"></div>
-<input id="tarefaInput${index}" placeholder="Nova tarefa">
+listaMaterias.innerHTML+=`
+<div class="card">${m.nome}</div>
 `;
-
-container.appendChild(card);
-
-const conteudos=document.getElementById("conteudos"+index);
-
-m.conteudos.forEach((c,ci)=>{
-conteudos.innerHTML+=`
-<div class="lista-item">
-<span>${c}</span>
-<button onclick="delConteudo(${index},${ci})">X</button>
-</div>`;
-});
-
-const tarefas=document.getElementById("tarefas"+index);
-
-m.tarefas.forEach((t,ti)=>{
-tarefas.innerHTML+=`
-<div class="lista-item">
-<div>
-<input type="checkbox" ${t.concluida?"checked":""}
-onchange="toggle(${index},${ti})">
-<span class="${t.concluida?"concluida":""}">${t.texto}</span>
-</div>
-<button onclick="delTarefa(${index},${ti})">X</button>
-</div>`;
-});
-
-document.getElementById("conteudoInput"+index)
-.addEventListener("keydown",e=>{
-if(e.key==="Enter") addConteudo(index,e.target.value)
-});
-
-document.getElementById("tarefaInput"+index)
-.addEventListener("keydown",e=>{
-if(e.key==="Enter") addTarefa(index,e.target.value)
-});
-
 });
 
 });
 }
 
-function toggleCategoria(tipo){
+// 📅 HORARIO
 
-const div=document.getElementById("cat-"+tipo);
+function gerarTabela(id,linhas){
+const dias=["Seg","Ter","Qua","Qui","Sex"];
 
-div.classList.toggle("ativo");
+let html="<tr><th></th>";
+dias.forEach(d=>html+=`<th>${d}</th>`);
+html+="</tr>";
 
-categoriasAbertas[tipo] = div.classList.contains("ativo");
-
-localStorage.setItem("categoriasAbertas", JSON.stringify(categoriasAbertas));
-
+for(let i=1;i<=linhas;i++){
+html+=`<tr><td>${i}</td>`;
+dias.forEach(d=>{
+html+=`<td contenteditable="true" id="${id}-${i}-${d}"></td>`;
+});
+html+="</tr>";
 }
 
-function addMateria(){
-
-const nome=document.getElementById("nomeMateria").value.trim();
-const tipo=document.getElementById("tipoMateria").value;
-
-if(!nome) return alert("Digite o nome");
-
-materias.push({nome,tipo,conteudos:[],tarefas:[]});
-
-salvar();
-renderMaterias();
-
-document.getElementById("nomeMateria").value="";
-
+document.getElementById(id).innerHTML=html;
 }
 
-function delMateria(i){
-materias.splice(i,1);
-salvar();
-renderMaterias();
-}
+function salvarHorario(){
+const user=auth.currentUser;
 
-function addConteudo(i,v){
-if(!v) return;
-materias[i].conteudos.push(v);
-salvar();
-renderMaterias();
-}
+let dados={};
 
-function delConteudo(i,ci){
-materias[i].conteudos.splice(ci,1);
-salvar();
-renderMaterias();
-}
-
-function addTarefa(i,v){
-if(!v) return;
-materias[i].tarefas.push({texto:v,concluida:false});
-salvar();
-renderMaterias();
-}
-
-function delTarefa(i,ti){
-materias[i].tarefas.splice(ti,1);
-salvar();
-renderMaterias();
-}
-
-function toggle(i,ti){
-materias[i].tarefas[ti].concluida=!materias[i].tarefas[ti].concluida;
-salvar();
-renderMaterias();
-}
-
-function salvarInfo(){
-
-info={
-escola:document.getElementById("escola").value,
-turma:document.getElementById("turma").value,
-serie:document.getElementById("serie").value,
-professor:document.getElementById("professor").value
-};
-
-salvar();
-mostrarInfo();
-
-}
-
-function mostrarInfo(){
-
-const div=document.getElementById("mostrarInfo");
-
-div.innerHTML=`
-<p><b>Escola:</b> ${info.escola||""}</p>
-<p><b>Turma:</b> ${info.turma||""}</p>
-<p><b>Série:</b> ${info.serie||""}</p>
-<p><b>Professor:</b> ${info.professor||""}</p>
-`;
-
-}
-
-function addProva(){
-
-const materia=document.getElementById("materiaProva").value;
-const data=document.getElementById("dataProva").value;
-const conteudo=document.getElementById("conteudoProva").value;
-
-provas.push({materia,data,conteudo});
-
-salvar();
-renderProvas();
-
-}
-
-function renderProvas(){
-
-const lista=document.getElementById("listaProvas");
-
-lista.innerHTML="";
-
-provas.forEach((p,i)=>{
-
-lista.innerHTML+=`
-<div class="card">
-<h3>${p.materia}</h3>
-<p><b>Data:</b> ${p.data}</p>
-<p><b>Conteúdo:</b> ${p.conteudo}</p>
-<button onclick="delProva(${i})">Excluir</button>
-</div>
-`;
-
+document.querySelectorAll("td[contenteditable]").forEach(td=>{
+dados[td.id]=td.innerText;
 });
 
+db.collection("horario")
+.doc(user.uid)
+.set(dados);
+
+alert("Salvo!");
 }
 
-function delProva(i){
-provas.splice(i,1);
-salvar();
-renderProvas();
+function carregarHorario(){
+const user=auth.currentUser;
+
+db.collection("horario")
+.doc(user.uid)
+.get()
+.then(doc=>{
+if(doc.exists){
+const dados=doc.data();
+for(let k in dados){
+const el=document.getElementById(k);
+if(el) el.innerText=dados[k];
+}
+}
+});
 }
 
-document.getElementById("nomeMateria").addEventListener("keydown",e=>{
-if(e.key==="Enter") addMateria();
-});
+// 🔁 NAVEGAÇÃO
 
-document.getElementById("conteudoProva").addEventListener("keydown",e=>{
-if(e.key==="Enter") addProva();
-});
-
-renderMaterias();
-renderProvas();
-mostrarInfo();
+function abrir(p){
+materias.style.display="none";
+horario.style.display="none";
+document.getElementById(p).style.display="block";
+}
 
 </script>
 
