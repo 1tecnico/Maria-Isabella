@@ -51,6 +51,9 @@ nav{
     cursor:pointer;
     margin-top:10px;
     font-weight:bold;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 .categoria-conteudo{
     display:none;
@@ -58,9 +61,6 @@ nav{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 10px;
-}
-.categoria-conteudo.ativo{
-    display: grid;
 }
 input, select, textarea{
     width:100%;
@@ -178,11 +178,9 @@ const firebaseConfig = {
   messagingSenderId: "COLE_AQUI",
   appId: "COLE_AQUI"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Variáveis
 let materias = [];
 let provas = [];
 let info = {};
@@ -239,7 +237,18 @@ function renderMaterias(){
 
         const cat = document.createElement("div");
         cat.className="categoria";
-        cat.textContent=tipo;
+
+        // Botão abrir/fechar
+        const btnToggle = document.createElement("button");
+        btnToggle.textContent = "Abrir/Fechar";
+        btnToggle.style.background="#74c69d";
+        btnToggle.onclick = ()=> divConteudo.classList.toggle("ativo");
+
+        const spanTipo = document.createElement("span");
+        spanTipo.textContent = tipo;
+
+        cat.appendChild(spanTipo);
+        cat.appendChild(btnToggle);
         lista.appendChild(cat);
 
         const divConteudo = document.createElement("div");
@@ -285,11 +294,12 @@ function renderMaterias(){
         });
 
         lista.appendChild(divConteudo);
-        cat.onclick=()=> divConteudo.classList.toggle("ativo");
     });
 }
 
-// Conteúdos/Tarefas
+// --------------------
+// CONTEÚDOS/TAREFAS
+// --------------------
 function addConteudo(i,v){ if(!v) return; materias[i].conteudos.push(v); salvarMaterias(); renderMaterias(); }
 function delConteudo(i,ci){ materias[i].conteudos.splice(ci,1); salvarMaterias(); renderMaterias(); }
 function addTarefa(i,v){ if(!v) return; materias[i].tarefas.push({texto:v,concluida:false}); salvarMaterias(); renderMaterias(); }
@@ -317,53 +327,20 @@ function carregarHorario(){ db.collection("publico").doc("horario").onSnapshot(d
 // --------------------
 // PROVAS
 // --------------------
-function addProva(){
-    const m = document.getElementById("materiaProva").value.trim();
-    const d = document.getElementById("dataProva").value;
-    const c = document.getElementById("conteudoProva").value.trim();
-    if(!m||!d||!c) return alert("Preencha todos os campos");
-    provas.push({materia:m,data:d,conteudo:c});
-    salvarProvas();
-    renderProvas();
-    document.getElementById("materiaProva").value="";
-    document.getElementById("dataProva").value="";
-    document.getElementById("conteudoProva").value="";
-}
+let provas = [];
+function addProva(){ const m=document.getElementById("materiaProva").value.trim(); const d=document.getElementById("dataProva").value; const c=document.getElementById("conteudoProva").value.trim(); if(!m||!d||!c)return alert("Preencha todos os campos"); provas.push({materia:m,data:d,conteudo:c}); salvarProvas(); renderProvas(); document.getElementById("materiaProva").value=""; document.getElementById("dataProva").value=""; document.getElementById("conteudoProva").value=""; }
 function salvarProvas(){ db.collection("publico").doc("provas").set({lista:provas}); }
 function carregarProvas(){ db.collection("publico").doc("provas").onSnapshot(doc=>{ if(doc.exists){ provas=doc.data().lista||[]; renderProvas(); } }); }
-function renderProvas(){
-    const div=document.getElementById("listaProvas"); div.innerHTML="";
-    provas.forEach((p,i)=>{
-        const card = document.createElement("div"); card.className="card";
-        card.innerHTML=`<h4>${p.materia}</h4><p><b>Data:</b>${p.data}</p><p><b>Conteúdo:</b>${p.conteudo}</p><button onclick="delProva(${i})">Excluir</button>`;
-        div.appendChild(card);
-    });
-}
+function renderProvas(){ const div=document.getElementById("listaProvas"); div.innerHTML=""; provas.forEach((p,i)=>{ const card=document.createElement("div"); card.className="card"; card.innerHTML=`<h4>${p.materia}</h4><p><b>Data:</b>${p.data}</p><p><b>Conteúdo:</b>${p.conteudo}</p><button onclick="delProva(${i})">Excluir</button>`; div.appendChild(card); }); }
 function delProva(i){ provas.splice(i,1); salvarProvas(); renderProvas(); }
 
 // --------------------
 // INFORMAÇÕES ESCOLARES
 // --------------------
-function salvarInfo(){
-    info={
-        escola:document.getElementById("escola").value,
-        turma:document.getElementById("turma").value,
-        turno:document.getElementById("turno").value,
-        aluno:document.getElementById("aluno").value
-    };
-    db.collection("publico").doc("info").set(info);
-    mostrarInfo();
-}
+let info={};
+function salvarInfo(){ info={ escola:document.getElementById("escola").value, turma:document.getElementById("turma").value, turno:document.getElementById("turno").value, aluno:document.getElementById("aluno").value }; db.collection("publico").doc("info").set(info); mostrarInfo(); }
 function carregarInfo(){ db.collection("publico").doc("info").onSnapshot(doc=>{ if(doc.exists){ info=doc.data(); mostrarInfo(); } }); }
-function mostrarInfo(){
-    const div = document.getElementById("mostrarInfo");
-    div.innerHTML=`
-        <p><b>Escola:</b> ${info.escola||""}</p>
-        <p><b>Turma:</b> ${info.turma||""}</p>
-        <p><b>Turno:</b> ${info.turno||""}</p>
-        <p><b>Aluno:</b> ${info.aluno||""}</p>
-    `;
-}
+function mostrarInfo(){ const div=document.getElementById("mostrarInfo"); div.innerHTML=`<p><b>Escola:</b>${info.escola||""}</p><p><b>Turma:</b>${info.turma||""}</p><p><b>Turno:</b>${info.turno||""}</p><p><b>Aluno:</b>${info.aluno||""}</p>`; }
 
 // --------------------
 // INICIAL
