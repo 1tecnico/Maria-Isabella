@@ -56,11 +56,17 @@ nav{
     align-items:center;
 }
 .categoria-conteudo{
-    display:none;
-    padding:10px 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 10px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+.categoria-conteudo.ativo{
+    max-height: 2000px;
+    opacity: 1;
 }
 input, select, textarea{
     width:100%;
@@ -235,7 +241,13 @@ function renderMaterias(){
         const divConteudo=document.createElement("div");
         divConteudo.className="categoria-conteudo";
 
-        btnToggle.onclick=()=> divConteudo.classList.toggle("ativo");
+        // Fecha todas as outras gavetas antes de abrir esta
+        btnToggle.onclick = () => {
+            document.querySelectorAll(".categoria-conteudo").forEach(c => {
+                if(c!==divConteudo) c.classList.remove("ativo");
+            });
+            divConteudo.classList.toggle("ativo");
+        }
 
         cat.appendChild(spanTipo);
         cat.appendChild(btnToggle);
@@ -307,7 +319,6 @@ carregarHorario();
 carregarProvas();
 carregarInfo();
 abrir("materias");
-
 </script>
 </body>
 </html>
