@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mochila Escolar Cloud</title>
+<title>Mochila Escolar Cloud Profissional</title>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -114,7 +114,7 @@ td, th{
 
 <body>
 
-<header>🎒 Mochila Escolar Cloud</header>
+<header>🎒 Mochila Escolar Cloud Profissional</header>
 
 <nav>
     <button onclick="abrir('materias')">Matérias</button>
@@ -128,7 +128,7 @@ td, th{
 <!-- MATÉRIAS -->
 <div id="materias" class="hidden">
     <div class="card">
-        <input id="nomeMateria" placeholder="Nova matéria" onkeydown="if(event.key==='Enter') addMateria()">
+        <input id="nomeMateria" placeholder="Nova matéria">
         <select id="tipoMateria">
             <option>Exatas</option>
             <option>Humanas</option>
@@ -156,9 +156,9 @@ td, th{
 <!-- PROVAS -->
 <div id="provas" class="hidden">
     <div class="card">
-        <input id="materiaProva" placeholder="Matéria" onkeydown="if(event.key==='Enter') addProva()">
+        <input id="materiaProva" placeholder="Matéria">
         <input id="dataProva" type="date">
-        <input id="conteudoProva" placeholder="Conteúdo da prova" onkeydown="if(event.key==='Enter') addProva()">
+        <input id="conteudoProva" placeholder="Conteúdo da prova">
         <button onclick="addProva()">Adicionar Prova</button>
     </div>
     <div id="listaProvas"></div>
@@ -244,7 +244,6 @@ function renderMaterias(){
         const divConteudo=document.createElement("div");
         divConteudo.className="categoria-conteudo";
 
-        // Fecha todas as outras gavetas antes de abrir esta
         btnToggle.onclick = () => {
             document.querySelectorAll(".categoria-conteudo").forEach(c => {
                 if(c!==divConteudo) c.classList.remove("ativo");
@@ -264,14 +263,13 @@ function renderMaterias(){
                 <h4>${m.nome} <button class="excluir" onclick="delMateria(${i})">Excluir</button></h4>
                 <h5>Conteúdos</h5>
                 <div id="conteudos-${i}"></div>
-                <input placeholder="Novo conteúdo" onkeydown="if(event.key==='Enter') addConteudo(${i},this.value)">
+                <input placeholder="Novo conteúdo" data-indice="${i}">
                 <h5>Tarefas</h5>
                 <div id="tarefas-${i}"></div>
-                <input placeholder="Nova tarefa" onkeydown="if(event.key==='Enter') addTarefa(${i},this.value)">
+                <input placeholder="Nova tarefa" data-indice="${i}">
             `;
             divConteudo.appendChild(card);
 
-            // Conteúdos
             const conteudosDiv=card.querySelector("#conteudos-"+i);
             m.conteudos.forEach((c,ci)=>{
                 const d=document.createElement("div");
@@ -280,7 +278,6 @@ function renderMaterias(){
                 conteudosDiv.appendChild(d);
             });
 
-            // Tarefas
             const tarefasDiv=card.querySelector("#tarefas-"+i);
             m.tarefas.forEach((t,ti)=>{
                 const d=document.createElement("div");
@@ -288,6 +285,12 @@ function renderMaterias(){
                 d.innerHTML=`<div><input type="checkbox" ${t.concluida?"checked":""} onchange="toggleTarefa(${i},${ti})"><span class="${t.concluida?"concluida":""}">${t.texto}</span></div><button class="excluir" onclick="delTarefa(${i},${ti})">X</button>`;
                 tarefasDiv.appendChild(d);
             });
+
+            // Adiciona evento Enter sem fechar gaveta
+            const inputConteudo=card.querySelectorAll("input")[0];
+            const inputTarefa=card.querySelectorAll("input")[1];
+            inputConteudo.addEventListener("keydown", e=>{ if(e.key==="Enter"){ addConteudo(i,inputConteudo.value); inputConteudo.value=""; e.preventDefault(); } });
+            inputTarefa.addEventListener("keydown", e=>{ if(e.key==="Enter"){ addTarefa(i,inputTarefa.value); inputTarefa.value=""; e.preventDefault(); } });
         });
     });
 }
